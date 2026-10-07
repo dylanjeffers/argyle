@@ -7,7 +7,7 @@
      (argyle base ns)
      (argyle base type lst)
      (argyle base type syn)
-     (argyle base type strm))
+     (argyle base type stream))
 
 ;;; TODO: add simple heirarchy
 (def base-type (x)
@@ -21,7 +21,7 @@
   ((procedure? x)         '<fn>)
   ((symbol? x)        '<symbol>)
   ((syn? x)        '<syn>)
-  ((strm? x)       '<stream>)
+  ((stream? x)       '<stream>)
   ((hash-table? x) '<hash-table>)
   ((char? x)        '<char>)
   ((vector? x)     '<vector>)
@@ -103,4 +103,4 @@
 (re-export-ns
  (argyle base type lst)
  (argyle base type syn)
- (argyle base type strm))
+ (argyle base type stream))

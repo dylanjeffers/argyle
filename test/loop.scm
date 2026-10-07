@@ -48,7 +48,7 @@
 (check "collect-maximum" 3 (collect-maximum (for x (in-list '(1 3 2))) x))
 (check "collect-average" 2 (collect-average (for x (in-list '(1 2 3))) x))
 (check "collect-stream" '(2 4)
-       (strm->lst (collect-stream (for x (in-list '(1 2))) (* 2 x))))
+       (stream->list (collect-stream (for x (in-list '(1 2))) (* 2 x))))
 (check "iterate" 6 (iterate ((s 0)) + (for x (in-list '(1 2 3))) x))
 (check "recur" '(1 2 3) (recur '() cons (for x (in-list '(1 2 3))) x))
 
