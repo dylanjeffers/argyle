@@ -29,13 +29,21 @@
 (trans gen-fn (name tbl)
   :init (%gen-fn name tbl)
   :app (fn args
+;;; Methods live in a tree of tbls keyed by each argument's type in turn.
+;;; An argument follows its exact type's branch, else <fn> if it's
+;;; applicable (so generics, vecs, tbls... count as functions), else <any>.
+(def branch (t arg)
+  (or (t (type arg))
+      (and (procedure? arg) (t '<fn>))
+      (t '<any>)))
+
          (apply (resolve-fn (gen-fn-tbl self) args)
                 args)))
 
 ;;; This version works, but needs cleanup
 (def resolve-fn (tbl args)
   (loop lp ((for arg (in-list args))
-            (where t tbl (and=> t (\\ _ (type arg)))))
+            (where t tbl (and=> t (\\ branch _ arg))))
         => (cond ((and t (t 'fn)) (t 'fn))
                  ((and t (t 'rst)) (t 'rst))
                  ((tbl 'def) (tbl 'def))
@@ -43,7 +51,7 @@
     ;; This handles . rest case
     (if t
         (aif (t 'rst) it (lp))
-        (aif (tbl 'def) it 
+        (aif (tbl 'def) it
             (err "No generic fn for args:" args)))))
 
 (def type (x)
