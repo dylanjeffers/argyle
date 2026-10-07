@@ -11,7 +11,7 @@
      (argyle data q)
      (argyle guile)
      (argyle loop)
-     (srfi srfi-1))
+     ((srfi srfi-1) :hide (length)))
 
 (mac gen
   ((name f) (id? #'name)

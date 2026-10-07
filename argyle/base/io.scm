@@ -1,5 +1,6 @@
 (ns (argyle base io)
-  :export (pr prn prnn))
+  :export (pr prn prnn)
+  :replace (format))
 (use (argyle base mac)
      (argyle base fn)
      (argyle base ctrl)

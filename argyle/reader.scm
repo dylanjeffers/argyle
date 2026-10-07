@@ -1,5 +1,5 @@
 (ns (argyle reader))
-(use (argyle base)
+(use ((argyle base) :hide (str))
      (argyle loop)
      (argyle generic)
      (argyle guile)                    ; tmp
