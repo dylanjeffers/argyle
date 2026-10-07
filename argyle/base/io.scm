@@ -19,4 +19,4 @@
 (defp pprn pretty-print)
 
 (defp format (str . args)
-  (apply format str #t args))
+  (apply (@ (guile) format) #t str args))
