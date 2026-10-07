@@ -15,7 +15,7 @@
 
 ;;; TODO: Add cartesian product for data
 (def * args
-  (cond ((null? args) 0)
+  (cond ((null? args) 1)
         ((num? (car args)) (apply _* args))
         ((one-of `(,str? ,chr?) (car args))
          (apply str-join
