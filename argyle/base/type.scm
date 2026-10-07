@@ -38,10 +38,11 @@
 (def coerce (x to-type . args)
   (let x-type (base-type x)
     (if (eqv? to-type x-type) x
-        (w/ (fail (fn args (error "Can't coerce" args '-> to-type))
-             conversions (hash-ref coercions to-type fail)
-             converter (hash-ref conversions x-type fail))
-          (apply converter (cons x args))))))
+        (w/ (conversions (hash-ref coercions to-type)
+             converter (and conversions (hash-ref conversions x-type)))
+          (if converter
+              (apply converter (cons x args))
+              (err "Can't coerce" x '-> to-type))))))
 
 (def coercions
   (ret coercions (make-hash-table)
