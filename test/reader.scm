@@ -14,7 +14,7 @@
 (check "#[] quoted symbol last" #(1 x) (#[1 'x]))
 (check "#[] quasiquoted symbol last" #(y) (#[`y]))
 
-(check "#{} reads as tbl" #t (tbl? #{'a 1}))
+(check "#{} reads as table" #t (table? #{'a 1}))
 (check "#{} lookup" 2 (#{'a 1 'b 2} 'b))
 (check "#{} evaluates" 3 (#{'k (+ 1 2)} 'k))
 (check "#{} string keys" 1 (#{"a" 1} "a"))

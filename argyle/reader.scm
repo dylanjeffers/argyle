@@ -3,7 +3,7 @@
      (argyle loop)
      (argyle generic base)
      (argyle guile)                    ; tmp
-     (argyle data tbl)
+     (argyle data table)
      (argyle data vec)
      (argyle conc)
      (ice-9 regex)
@@ -81,8 +81,8 @@
   (if (nil? lst) (values '() '()) 
       (values (car lst) (cdr lst))))
 
-(xtnd-readr #\[ '(vec tbl) '("[" "{") '("]" "}"))
-(xtnd-readr #\{ '(vec tbl) '("[" "{") '("]" "}"))
+(xtnd-readr #\[ '(vec table) '("[" "{") '("]" "}"))
+(xtnd-readr #\{ '(vec table) '("[" "{") '("]" "}"))
 
 ;;; TODO: move to conc.scm?
 (read-hash-extend #\@

@@ -7,7 +7,7 @@
                (w/ . _w/)
                (fn . _fn)
                (fns . _fns)))
-     ((argyle data tbl) :select (<tbl>))
+     ((argyle data table) :select (<table>))
      (argyle loop)
      (argyle match compat)
      ((srfi srfi-1) :select (zip reduce append-map)))
@@ -38,8 +38,8 @@
 (mac match-xpnd (:keys)
   ((() . bdy)
    #'(do . bdy))
-  ((((:keys key ...) tbl . rst) . bdy)
-   #'(tbl-match tbl ((:keys key ...)
+  ((((:keys key ...) table . rst) . bdy)
+   #'(tbl-match table ((:keys key ...)
                      (match-xpnd rst . bdy))))
   (((kwd kwd' . rst) . bdy) (keyword? (syn->dat #'kwd))
    #'(op-match-xpnd rst . bdy))
@@ -47,16 +47,16 @@
    #'(match exp (pat (match-xpnd rst . bdy)))))
 
 (mac tbl-match (:keys)
-  ((tbl ((:keys key ...) . bdy))
-   #`(match tbl (($ <tbl>)
-                 (w/keys (key ...) tbl
+  ((table ((:keys key ...) . bdy))
+   #`(match table (($ <table>)
+                 (w/keys (key ...) table
                          #,@#'bdy)))))
 
 (mac w/keys
-  (((key ...) tbl bdy)
+  (((key ...) table bdy)
    #`(w/ #,(splice
             (map (_fn (key)
-                   #`(#,key (tbl '#,key)))
+                   #`(#,key (table '#,key)))
                  #'(key ...)))
        bdy)))
 

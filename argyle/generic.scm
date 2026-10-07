@@ -5,17 +5,17 @@
   :export (gen <gen-fn> gen-fn? xtnd type))
 (use (argyle base)
      (argyle data)
-     (argyle data tbl)
+     (argyle data table)
      (argyle guile)
      (argyle loop)
      ((srfi srfi-1) :select (unzip2)))
 
 (mac gen
   ((name f) (id? #'name)
-   #'(def name (%gen-fn 'name (tbl 'def f))))
+   #'(def name (%gen-fn 'name (table 'def f))))
   ((name) (id? #'name)
    #'(def name (%gen-fn 'name (let f (imported-ref (current-module) 'name)
-                                (if f (tbl 'def f) (mke-tbl)))))))
+                                (if f (table 'def f) (make-table)))))))
 
 ;;; Compiled modules declare their own top-level vars before running, so
 ;;; (defined? 'car) would see the module's unbound car; look in imports.
@@ -23,10 +23,10 @@
   (let v (or-map (fn (m) (module-variable m name)) (module-uses mod))
     (and v (variable-bound? v) (variable-ref v))))
 
-(data! gen-fn (name tbl)
-  :init (%gen-fn name tbl)
+(data! gen-fn (name table)
+  :init (%gen-fn name table)
   :app (fn args
-         (apply (resolve-fn (gen-fn-tbl self) args)
+         (apply (resolve-fn (gen-fn-table self) args)
                 args)))
 
 ;;; Methods live in a tree of tbls keyed by each argument's type in turn.
@@ -38,17 +38,17 @@
       (t '<any>)))
 
 ;;; This version works, but needs cleanup
-(def resolve-fn (tbl args)
+(def resolve-fn (table args)
   (loop lp ((for arg (in-list args))
-            (where t tbl (and=> t (\\ branch _ arg))))
+            (where t table (and=> t (\\ branch _ arg))))
         => (cond ((and t (t 'fn)) (t 'fn))
                  ((and t (t 'rst)) (t 'rst))
-                 ((tbl 'def) (tbl 'def))
+                 ((table 'def) (table 'def))
                  (else (error "No generic fn for args1:" args)))
     ;; This handles . rest case
     (if t
         (aif (t 'rst) it (lp))
-        (aif (tbl 'def) it
+        (aif (table 'def) it
             (error "No generic fn for args:" args)))))
 
 (def type (x)
@@ -62,17 +62,17 @@
   ((procedure-name (arg1 ... . rest) body ...) (~(nil? #'rest))
    (let-syn (args types) (split #'(arg1 ...))
      #`(loop ((for type  (in-list 'types))
-              (where type-tree (gen-fn-tbl procedure-name)
+              (where type-tree (gen-fn-table procedure-name)
                 (or (type-tree type)
-                    (do (type-tree type (mke-tbl))
+                    (do (type-tree type (make-table))
                         (type-tree type)))))
         => (type-tree 'rst (fn (#,@#'args . rest) body ...)))))
   ((procedure-name (arg1 ...) body ...)
    (let-syn (args types) (split #'(arg1 ...))
             ;; TODO: refactor
      #`(loop ((for type (in-list 'types))
-              (where type-tree (gen-fn-tbl procedure-name)
+              (where type-tree (gen-fn-table procedure-name)
                      (or (type-tree type)
-                         (do (type-tree type (mke-tbl))
+                         (do (type-tree type (make-table))
                              (type-tree type)))))
          => (type-tree 'fn (fn args body ...))))))
