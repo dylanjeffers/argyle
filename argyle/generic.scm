@@ -1,17 +1,14 @@
+;;; Generic functions: gen defines one, xtnd adds a method for a list of
+;;; argument types.  The generics themselves live in (argyle generic base)
+;;; and (argyle generic coll).
 (ns (argyle generic)
-  :export (gen <gen-fn> gen-fn? xtnd type
-           str len rev join cpy clr! kth
-           map))
+  :export (gen <gen-fn> gen-fn? xtnd type))
 (use (argyle base)
-     ((argyle base type)
-      :select ((str . _str)))
      (argyle data)
      (argyle data tbl)
-     (argyle data vec)
-     (argyle data q)
      (argyle guile)
      (argyle loop)
-     ((srfi srfi-1) :hide (length)))
+     ((srfi srfi-1) :select (unzip2)))
 
 (mac gen
   ((name f) (id? #'name)
@@ -29,6 +26,9 @@
 (trans gen-fn (name tbl)
   :init (%gen-fn name tbl)
   :app (fn args
+         (apply (resolve-fn (gen-fn-tbl self) args)
+                args)))
+
 ;;; Methods live in a tree of tbls keyed by each argument's type in turn.
 ;;; An argument follows its exact type's branch, else <fn> if it's
 ;;; applicable (so generics, vecs, tbls... count as functions), else <any>.
@@ -36,9 +36,6 @@
   (or (t (type arg))
       (and (procedure? arg) (t '<fn>))
       (t '<any>)))
-
-         (apply (resolve-fn (gen-fn-tbl self) args)
-                args)))
 
 ;;; This version works, but needs cleanup
 (def resolve-fn (tbl args)
@@ -79,52 +76,3 @@
                          (do (type-tree type (mke-tbl))
                              (type-tree type)))))
          => (type-tree 'fn (fn args body ...))))))
-
-(gen len length)
-(gen rev reverse)
-(gen join append)
-(gen cpy lst-cpy)
-(gen clr! (fn (lst) (set-cdr! lst '())))
-
-(gen car)
-(gen cdr)
-(gen kth list-ref)
-(gen take)
-(gen drop)
-
-(defp str args
-  (reduce-right str-join "" (map _str args)))
-
-(xtnd len (s <str>) (str-len s))
-(xtnd len (n <int>) (str-len (str n)))
-(xtnd len (t <tbl>) (tbl-cnt (const #t) t))
-(xtnd len (v <vec>) (vec-len v))
-(xtnd len (q <q>) (q-len q))
-(xtnd len (stream <strm>) (strm-len stream))
-
-(xtnd rev (s <str>) (string-reverse s))
-
-(xtnd join (s1 <str> . rest) (apply str-join s1 rest))
-
-(xtnd join (strms <strm>) (strm-join strms))
-(xtnd join (s1 <strm> . rest) (apply (@ (argyle lib streams) stream-append) s1 rest))
-
-(xtnd cpy (v <vec>) (vec-cpy v))
-(xtnd cpy (q <q>) (%mke-q (q-len q) (q-hd q) (q-tl q)))
-(xtnd clr! (t <tbl>) (tbl-clr! t))
-(xtnd clr! (q <q>) (q-hd! q '()) (q-tl! q '()) (q-len! q 0))
-
-(xtnd car (seq <strm>) (scar seq))
-(xtnd car (seq <vec>) (seq 0))
-(xtnd car (seq <q>) (q-pk seq))
-(xtnd cdr (seq <strm>) (scdr seq))
-(xtnd take (seq <strm> k <int>) (strm-take k seq))
-(xtnd drop (seq <strm> k <int>) (strm-drop k seq))
-(xtnd kth (seq <vec> k <int>) (seq k))
-
-;;; Collections
-
-(gen map (@ (srfi srfi-1) map))
-(xtnd map (f <fn> v <vec>) (vec-map f v))
-(xtnd map (f <fn> s <str> . rst) (apply str-map f s rst))
-(xtnd map (f <fn> t <tbl>) (tbl-map->lst f t))

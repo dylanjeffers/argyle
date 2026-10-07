@@ -14,7 +14,7 @@
 (use ((system syntax)
       :select (syntax-local-binding))
      (argyle base) (argyle guile) (argyle data) (argyle loop)
-     (argyle generic)
+     (argyle generic base)
      (ice-9 match)
      (srfi srfi-26))
 

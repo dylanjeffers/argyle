@@ -1,5 +1,5 @@
 (ns (argyle data set)
-    :export (<set> set set? has? elements))
+    :export (<set> set set? set-t has? elements))
 (use (argyle base)
      (argyle data))
 

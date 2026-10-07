@@ -1,7 +1,7 @@
 (ns (argyle reader))
 (use ((argyle base) :hide (str))
      (argyle loop)
-     (argyle generic)
+     (argyle generic base)
      (argyle guile)                    ; tmp
      (argyle data tbl)
      (argyle data vec)

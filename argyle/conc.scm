@@ -2,7 +2,6 @@
   #:replace (@)
   :export (futr futr? mke-futr <ref> ref ref? doasync dosync alter))
 (use (argyle base)
-     (argyle generic)
      (argyle guile)
      (argyle loop)
      (argyle data)
