@@ -38,7 +38,7 @@
 (mac $>
   ((exp)           #'(c/prmt (tag) (fn () exp) hdlr))
   ((exp hdlr)      #'(c/prmt (tag) (fn () exp) hdlr))
-  ((tag expr hdlr) #'(c/prmt (tag) (fn () exp) hdlr)))
+  ((t expr hdlr)   #'(c/prmt t (fn () expr) hdlr)))
 
 (def hdlr (cont f)
   ($> (tag) (f cont) hdlr))
