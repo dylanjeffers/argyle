@@ -21,7 +21,7 @@
          (scandir (str root "/" dir))))
 
 (def module-name (file)
-  (map str->sym (string-split (string-drop-right file 4) #\/)))
+  (map string->symbol (string-split (string-drop-right file 4) #\/)))
 
 (def unbound-exports (name)
   (let iface (resolve-interface name)

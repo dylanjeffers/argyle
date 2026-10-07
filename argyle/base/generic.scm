@@ -6,30 +6,30 @@
 
 (def + args
   (cond ((null? args) 0)
-        ((num? (car args)) (apply _+ args))
-        ((one-of `(,str? ,chr?) (car args))
-         (apply str-join (map str args)))
-        ((sym? (car args))
-         (apply sym-join (map sym args)))
+        ((number? (car args)) (apply _+ args))
+        ((one-of `(,string? ,char?) (car args))
+         (apply string-append (map str args)))
+        ((symbol? (car args))
+         (apply symbol-append (map sym args)))
         (else (apply _+ args))))
 
 ;;; TODO: Add cartesian product for data
 (def * args
   (cond ((null? args) 1)
-        ((num? (car args)) (apply _* args))
-        ((one-of `(,str? ,chr?) (car args))
-         (apply str-join
+        ((number? (car args)) (apply _* args))
+        ((one-of `(,string? ,char?) (car args))
+         (apply string-append
                 (map (fn (val) (str (car args)))
                      (iota (apply _* (cdr args))))))
-        ((sym? (car args))
-         (apply sym-join
+        ((symbol? (car args))
+         (apply symbol-append
                 (map (fn (val) (sym (car args)))
                      (iota (apply _* (cdr args))))))
         (else (apply _* args))))
 
 (def length (x)
-  (cond ((lst? x) (_length x))
-        ((str? x) (str-len x))
+  (cond ((list? x) (_length x))
+        ((string? x) (string-length x))
         ((hash-table? x) (hash-count (const #t) x))
         ((vector? x) (vector-length x))
         (else (_length x))))

@@ -17,12 +17,12 @@
   (def regx (apply string-append `("[" ,@ends ,@strts "]")))
   (def sym-buff (sym-exp) (str-split regx (str sym-exp)))
   (def mke-struct (#:o (strt "["))
-    `(,(list-ref ctors (lst-idx strts strt string=?))))        ; zero for now
+    `(,(list-ref ctors (index-of strts strt string=?))))        ; zero for now
   (def parse (obj prt #:o (buff '()))
     (if (nil? buff)
         (let nxt (get-datum prt)
           (cond ((eof-object? nxt) obj)
-                ((sym? nxt) (parse obj prt (sym-buff nxt)))
+                ((symbol? nxt) (parse obj prt (sym-buff nxt)))
                 ;; 'x] reads as (quote x]): split the symbol and keep
                 ;; only its first piece quoted.
                 ((quoted-sym? nxt)
@@ -47,13 +47,13 @@
 
 (def quoted-sym? (obj)
   (and (pair? obj) (memq (car obj) '(quote quasiquote unquote))
-       (pair? (cdr obj)) (sym? (cadr obj))))
+       (pair? (cdr obj)) (symbol? (cadr obj))))
 
-(def strt? (strts obj) (and (str? obj) (or-map (fn (strt) (string=? obj strt)) strts)))
-(def end? (ends obj) (and (str? obj) (or-map (fn (end) (string=? obj end)) ends)))
+(def strt? (strts obj) (and (string? obj) (or-map (fn (strt) (string=? obj strt)) strts)))
+(def end? (ends obj) (and (string? obj) (or-map (fn (end) (string=? obj end)) ends)))
 
 ;;; TODO: generalize aned add to lst.scm
-(def lst-idx (lst obj eq?)
+(def index-of (lst obj eq?)
   (loop ((for obj* rst (in-list lst))
          (where idx 0 (1+ idx))
          (until (eq? obj* obj)))
@@ -74,7 +74,7 @@
   (reduce join '() (rev lst)))
 
 (def ->dat (str)
-  (aif (str->num str) it (sym str)))
+  (aif (string->number str) it (sym str)))
 
 ;;; backwards cons :)
 (def snoc (lst)

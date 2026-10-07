@@ -41,7 +41,7 @@
   ((((:keys key ...) tbl . rst) . bdy)
    #'(tbl-match tbl ((:keys key ...)
                      (match-xpnd rst . bdy))))
-  (((kwd kwd' . rst) . bdy) (kwd? (syn->dat #'kwd))
+  (((kwd kwd' . rst) . bdy) (keyword? (syn->dat #'kwd))
    #'(op-match-xpnd rst . bdy))
   (((pat exp . rst) . bdy)
    #'(match exp (pat (match-xpnd rst . bdy)))))
@@ -63,7 +63,7 @@
 ;;; TODO: only one body
 (mac let-syn-vars
   ((vars pat body)
-   #'(_let pat-ids (flatten (rec-filter sym? `(,(syn->dat #'pat))))
+   #'(_let pat-ids (flatten (rec-filter symbol? `(,(syn->dat #'pat))))
          (let-syn vars (map (_fn (id) (syn id #'pat)) pat-ids)
            body))))
 

@@ -45,12 +45,12 @@
 
 (def ifcons (head tail)
   (if tail (cons head tail)
-      (lst head)))
+      (list head)))
 
 (defp grp-by (pred seq)
   (loop ((for elt (in-list seq))
          (where t (tbl)
                 (update t (pred elt)
                         (\\ ifcons elt _))))
-    => (tbl-map->lst (fn (k v) (lst k (reverse v)))
+    => (tbl-map->lst (fn (k v) (list k (reverse v)))
                      t)))

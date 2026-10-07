@@ -15,7 +15,7 @@
 
 (gen map lst-map)
 (xtnd map (f <fn> v <vec>) (vec-map f v))
-(xtnd map (f <fn> s <str> . rst) (apply str-map f s rst))
+(xtnd map (f <fn> s <str> . rst) (apply string-map f s rst))
 (xtnd map (f <fn> t <tbl>) (tbl-map->lst f t))
 (xtnd map (f <fn> q <q>) (lst->q (lst-map f (q->lst q))))
 (xtnd map (f <fn> s <set>) (apply set (lst-map f (elements s))))
@@ -34,13 +34,13 @@
 ;;; (reduce f ridentity coll), as SRFI-1's reduce.
 (gen reduce lst-reduce)
 (xtnd reduce (f <fn> init <any> v <vec>) (lst-reduce f init (vec->lst v)))
-(xtnd reduce (f <fn> init <any> s <str>) (lst-reduce f init (str->lst s)))
+(xtnd reduce (f <fn> init <any> s <str>) (lst-reduce f init (string->list s)))
 (xtnd reduce (f <fn> init <any> q <q>) (lst-reduce f init (q->lst q)))
 (xtnd reduce (f <fn> init <any> s <set>) (lst-reduce f init (elements s)))
 (xtnd reduce (f <fn> init <any> s <strm>) (lst-reduce f init (strm->lst s)))
 
-(gen cpy lst-cpy)
-(xtnd cpy (s <str>) (str-cpy s))
+(gen cpy list-copy)
+(xtnd cpy (s <str>) (string-copy s))
 (xtnd cpy (v <vec>) (vec-cpy v))
 (xtnd cpy (t <tbl>) (ret t* (mke-tbl) (tbl-each t* t)))
 (xtnd cpy (q <q>) (%mke-q (q-len q) (q-hd q) (q-tl q)))

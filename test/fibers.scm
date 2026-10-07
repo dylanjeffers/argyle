@@ -7,7 +7,7 @@
        (let out '()
          (go (=! out (cons 'a out))
              (=! out (cons 'b out)))
-         (sort out (fn (x y) (string<? (sym->str x) (sym->str y))))))
+         (sort out (fn (x y) (string<? (symbol->string x) (symbol->string y))))))
 
 (check "channels pass values between fibers" 42
        (let ch (make-channel)

@@ -37,7 +37,7 @@
 (check "tbl-del!" #f (do (tbl-del! t 'd) (t 'd)))
 (check "tbl-fold" 6 (tbl-fold (fn (k v acc) (+ v acc)) 0 t))
 (check "tbl-map->lst" '(a b c)
-       (sort (tbl-map->lst (fn (k v) k) t) (fn (x y) (string<? (sym->str x) (sym->str y)))))
+       (sort (tbl-map->lst (fn (k v) k) t) (fn (x y) (string<? (symbol->string x) (symbol->string y)))))
 (check "tbl-each" 6 (let n 0 (tbl-each (fn (k v) (=! n (+ n v))) t) n))
 (check "update" 11 (do (update t 'a (\\ + 10 _)) (t 'a)))
 (check "tbl-clr!" 0 (do (tbl-clr! t) (tbl-cnt (const #t) t)))

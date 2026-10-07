@@ -12,11 +12,11 @@
      ((srfi srfi-1) :select (reduce-right)))
 
 (defp str args
-  (reduce-right str-join "" (map _str args)))
+  (reduce-right string-append "" (map _str args)))
 
 (gen len length)
-(xtnd len (s <str>) (str-len s))
-(xtnd len (n <int>) (str-len (str n)))
+(xtnd len (s <str>) (string-length s))
+(xtnd len (n <int>) (string-length (str n)))
 (xtnd len (t <tbl>) (tbl-cnt (const #t) t))
 (xtnd len (v <vec>) (vec-len v))
 (xtnd len (q <q>) (q-len q))
@@ -27,7 +27,7 @@
 (xtnd rev (s <str>) (string-reverse s))
 
 (gen join append)
-(xtnd join (s1 <str> . rest) (apply str-join s1 rest))
+(xtnd join (s1 <str> . rest) (apply string-append s1 rest))
 (xtnd join (strms <strm>) (strm-join strms))
 (xtnd join (s1 <strm> . rest) (apply stream-append s1 rest))
 

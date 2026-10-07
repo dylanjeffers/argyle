@@ -6,32 +6,26 @@
      (argyle base err)
      (argyle base ns)
      (argyle base type lst)
-     (argyle base type str)
-     (argyle base type num)
-     (argyle base type fn)
-     (argyle base type sym)
      (argyle base type syn)
-     (argyle base type chr)
-     (argyle base type kwd)
-     (argyle base type strm)
-     (argyle base type tup))
+     (argyle base type strm))
 
 ;;; TODO: add simple heirarchy
 (def base-type (x)
  (cond
-  ((lst? x)        '<lst>)
-  ((tup? x)        '<tup>)
-  ((str? x)        '<str>)
-  ((int? x)        '<int>)
-  ((num? x)        '<num>)
-  ((fn? x)         '<fn>)
-  ((sym? x)        '<sym>)
+  ((list? x)        '<lst>)
+  ((pair? x)        '<tup>)
+  ((string? x)        '<str>)
+  ;; Not two clauses: Guile 3.0.11's compiler wrongly skips a number?
+  ;; clause that follows a failed integer? test, so 1.5 fell through.
+  ((number? x)     (if (integer? x) '<int> '<num>))
+  ((procedure? x)         '<fn>)
+  ((symbol? x)        '<sym>)
   ((syn? x)        '<syn>)
   ((strm? x)       '<strm>)
   ((hash-table? x) '<hash-tbl>)
-  ((chr? x)        '<chr>)
+  ((char? x)        '<chr>)
   ((vector? x)     '<vector>)
-  ((kwd? x)        '<kwd>)
+  ((keyword? x)        '<kwd>)
   ((null? x)       '<nil>)
   (else            (error "Type: unknown type" x))))
 
@@ -62,28 +56,28 @@
               (<str> ,(fn (dat ctx) (dat->syn ctx dat)))
               (<sym> ,(fn (dat ctx) (dat->syn ctx dat)))
               (<kwd> ,(fn (dat ctx) (dat->syn ctx dat))))
-       (<str> (<int> ,num->str)
-              (<num> ,num->str)
+       (<str> (<int> ,number->string)
+              (<num> ,number->string)
               (<chr> ,string)
-              (<sym> ,(fn (x) (if (eqv? x (symbol)) "" (sym->str x)))))
+              (<sym> ,(fn (x) (if (eqv? x (symbol)) "" (symbol->string x)))))
        
-       (<sym> (<str> ,str->sym)
-              (<chr> ,(fn (c) (str->sym (string c))))
-              (<num> ,(\\ (compose str->sym num->str) _)))
+       (<sym> (<str> ,string->symbol)
+              (<chr> ,(fn (c) (string->symbol (string c))))
+              (<num> ,(\\ (compose string->symbol number->string) _)))
        
-       (<int> (<chr> ,(fn (c . args) (chr->int c)))
+       (<int> (<chr> ,(fn (c . args) (char->integer c)))
               (<num> ,(fn (x . args) (iround x)))
               (<str> ,(fn (x . args)
-                        (aif (str->num x) (iround it)
+                        (aif (string->number x) (iround it)
                              (error "Can't coerce" x '-> 'int)))))
        
        (<num> (<str> ,(fn (x . args)
-                        (or (str->num x)
+                        (or (string->number x)
                             (error "Can't coerce " x '-> 'num))))
               (<int> ,(fn (x) x)))
        
-       (<chr> (<int> ,int->chr)
-              (<num> ,(fn (x) (int->chr
+       (<chr> (<int> ,integer->char)
+              (<num> ,(fn (x) (integer->char
                                (iround x)))))))
     coercions))
 
@@ -94,19 +88,12 @@
    #`(do #,@(map (fn (t)
                    #`(defp #,t (obj . args)
                        (apply coerce obj
-                              (sym-join '< '#,t '>) args)))
+                              (symbol-append '< '#,t '>) args)))
                  #'(t1 ...)))))
 
 (export-type-ctrs str num int sym syn dat chr)
 
-(re-export-ns 
+(re-export-ns
  (argyle base type lst)
- (argyle base type str)
- (argyle base type num)
- (argyle base type fn)
- (argyle base type sym)
  (argyle base type syn)
- (argyle base type chr)
- (argyle base type kwd)
- (argyle base type strm)
- (argyle base type tup))
+ (argyle base type strm))
