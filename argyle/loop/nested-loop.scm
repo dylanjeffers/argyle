@@ -287,7 +287,8 @@
      (LAZY-RECUR tail-expression STREAM-CONS clause0 clause1+ ...))
 
     ((COLLECT-STREAM clause0 clause1+ ...)
-     (COLLECT-STREAM (INITIAL STREAM-NIL) clause0 clause1+ ...))))
+     ;; SRFI-41's empty stream; upstream used Riastradh's stream-nil.
+     (COLLECT-STREAM (INITIAL STREAM-NULL) clause0 clause1+ ...))))
 
 (define-syntax collect-list!
   (syntax-rules (INITIAL)
