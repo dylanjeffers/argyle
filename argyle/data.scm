@@ -1,12 +1,12 @@
 (ns (argyle data)
-    :export (data trans data? data-type? data-type))
+    :export (data data! data? data-type? data-type))
 (use (argyle base)
      (argyle data records)
      (argyle data immutable)
      ((srfi srfi-1) :select (first)))
 
 (mac data (patt #'(%data #t patt)))
-(mac trans (patt #'(%data #f patt)))
+(mac data! (patt #'(%data #f patt)))
 
 (mac %data x (:init :app)
   ((imm? (name (field ...)

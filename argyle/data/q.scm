@@ -7,7 +7,7 @@
      (argyle data)
      (argyle data vec))
 
-(trans q (len hd tl)
+(data! q (len hd tl)
   :init (%mke-q len hd tl)
   :app (fns
         (() (deq! self))

@@ -1,4 +1,4 @@
-;;; Data structures: vec, tbl, q, set, and user-defined data / trans types.
+;;; Data structures: vec, tbl, q, set, and user-defined data / data! types.
 ;;; Run with: test/run data
 
 (use (argyle) (test check))
@@ -38,7 +38,7 @@
 (check "tbl-fold" 6 (tbl-fold (fn (k v acc) (+ v acc)) 0 t))
 (check "tbl-map->lst" '(a b c)
        (sort (tbl-map->lst (fn (k v) k) t) (fn (x y) (string<? (sym->str x) (sym->str y)))))
-(check "tbl-each" 6 (let n 0 (tbl-each (fn (k v) (= n (+ n v))) t) n))
+(check "tbl-each" 6 (let n 0 (tbl-each (fn (k v) (=! n (+ n v))) t) n))
 (check "update" 11 (do (update t 'a (\\ + 10 _)) (t 'a)))
 (check "tbl-clr!" 0 (do (tbl-clr! t) (tbl-cnt (const #t) t)))
 (check "mke-tbl empty" 0 (tbl-cnt (const #t) (mke-tbl)))
@@ -87,7 +87,7 @@
 
 ;;; trans: mutable records
 
-(trans cell (val))
+(data! cell (val))
 (def c (cell 1))
 (check "trans setter mutates" 5 (do (cell-val! c 5) (cell-val c)))
 
@@ -95,7 +95,7 @@
 
 (data counter (n) :app (fn () (counter-n self)))
 (check "data :app" 7 ((counter 7)))
-(trans acc (total) :app (fn (x) (acc-total! self (+ x (acc-total self))) self))
+(data! acc (total) :app (fn (x) (acc-total! self (+ x (acc-total self))) self))
 (check "trans :app" 6 (acc-total ((((acc 0) 1) 2) 3)))
 
 ;;; custom constructor with :init

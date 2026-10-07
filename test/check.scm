@@ -14,8 +14,8 @@
 
 (def record! (name ok? expected got)
   (if ok?
-      (= passed (1+ passed))
-      (do (= failed (1+ failed))
+      (=! passed (1+ passed))
+      (do (=! failed (1+ failed))
           (format "FAIL ~a\n  expected: ~s\n  got:      ~s\n" name expected got))))
 
 (def raised (key . args)

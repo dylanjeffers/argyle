@@ -3,7 +3,7 @@
 (use (argyle base)
      (argyle data))
 
-(trans set (t)
+(data! set (t)
    :init (%mke-set t)
    :app (fn (v) (hash-set! (set-t self) v v) self))
 

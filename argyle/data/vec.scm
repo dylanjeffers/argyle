@@ -5,7 +5,7 @@
      (srfi srfi-43))
 
 ;;; TODO: add optional fill
-(trans vec (v)
+(data! vec (v)
   :init (%mke-vec v)
   :app (let v (vec-v self)
          (fns

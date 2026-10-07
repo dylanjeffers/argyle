@@ -23,7 +23,7 @@
   (let v (or-map (fn (m) (module-variable m name)) (module-uses mod))
     (and v (variable-bound? v) (variable-ref v))))
 
-(trans gen-fn (name tbl)
+(data! gen-fn (name tbl)
   :init (%gen-fn name tbl)
   :app (fn args
          (apply (resolve-fn (gen-fn-tbl self) args)

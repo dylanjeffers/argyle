@@ -18,7 +18,7 @@
          (list (f) (f 1) (f 1 2))))
 (check "let" 6 (let x 3 (* x 2)))
 (check "w/ binds in sequence" 3 (w/ (a 1 b (+ a 1)) (+ a b)))
-(check "ret" '(1) (ret x '() (= x (cons 1 x))))
+(check "ret" '(1) (ret x '() (=! x (cons 1 x))))
 (check "\\\\ cut" '(2 3 4) (map (\\ + 1 _) '(1 2 3)))
 (check "\\\\ rest slot" '(1 2 3) ((\\ list 1 ___) 2 3))
 (check "->> threads left to right" 4 (->> 1 1+ (\\ * 2 _)))
@@ -32,8 +32,9 @@
 ;;; Control
 
 (check "do" 2 (do 1 2))
-(check "= sets" 5 (let x 1 (= x 5) x))
-(check "= sets several" '(1 2) (w/ (a 0 b 0) (= a 1 b 2) (list a b)))
+(check "=! sets" 5 (let x 1 (=! x 5) x))
+(check "=! sets several" '(1 2) (w/ (a 0 b 0) (=! a 1 b 2) (list a b)))
+(check "= is numeric equality" '(#t #f #t) (list (= 1 1.0) (= 1 2) (= 2 2 2)))
 (check "aif true" 2 (aif (assq 'b '((a . 1) (b . 2))) (cdr it) 'none))
 (check "aif false" 'none (aif #f it 'none))
 (check "&" '(2 #f) (list (& 1 2) (& 1 #f 3)))
@@ -116,7 +117,7 @@
 ;;; Macros
 
 (mac swap!
-  ((a b) #'(let tmp a (= a b) (= b tmp))))
+  ((a b) #'(let tmp a (=! a b) (=! b tmp))))
 (check "mac" '(2 1) (w/ (x 1 y 2) (swap! x y) (list x y)))
 
 (mac kw-test (:to)

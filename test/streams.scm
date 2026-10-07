@@ -24,7 +24,7 @@
 (check "itr" '(1 2 4 8) (strm->lst (strm-take 4 (itr (\\ * 2 _) 1))))
 (check "strm-unfld" '(0 1 4)
        (strm->lst (strm-unfld (fn (x) (* x x)) (\\ < _ 3) 1+ 0)))
-(check "strm-each" 6 (let n 0 (strm-each (fn (x) (= n (+ n x))) (strm-range 1 4)) n))
+(check "strm-each" 6 (let n 0 (strm-each (fn (x) (=! n (+ n x))) (strm-range 1 4)) n))
 (check "strm-join" '(1 2 3)
        (strm->lst (strm-join (lst->strm (list (strm-range 1 3) (strm-range 3 4))))))
 (check "sfn" '(0 1) (strm->lst ((sfn (n) (strm-take n nats)) 2)))

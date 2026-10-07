@@ -1,5 +1,5 @@
 (ns (argyle base ctrl)
-    :replace (do = aif & $> nil?))
+    :replace (do =! aif & $> nil?))
 (use ((srfi srfi-1) :select (append-map lset-difference))
      (argyle guile)
      (argyle base mac)
@@ -10,9 +10,9 @@
 (mac do ((e1 ...) #'(begin e1 ...)))
 
 ;;; TODO: check if var is a free variable, and if so, define it
-(mac =
+(mac =!
   ((var val) #'(set! var val))
-  ((var val rest ...) #'(do (set! var val) (= rest ...))))
+  ((var val rest ...) #'(do (set! var val) (=! rest ...))))
 
 
 (mac aif x

@@ -6,7 +6,7 @@
      (argyle data))
 
 ;;; TODO: allow init size and comparison operators
-(trans tbl (t)
+(data! tbl (t)
   :init (%mke-tbl t)
   :app (fns
         (() (tbl-t self))
