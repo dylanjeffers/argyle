@@ -13,13 +13,30 @@ Arc + Guile
 (let (:keys a b) #{'a 1 'b 2} (+ a b)) ; => 3, destructuring everywhere
 (aif (assq 'b '((b . 2))) (cdr it) 'none) ; => 2
 
-(data point (x y))
+(data point (x y))                   ; immutable record
 (point-x (point 1 2))                ; => 1
+(data! cell (val))                   ; mutable record
+(let x 1 (=! x 5) x)                 ; => 5, ! marks mutation
 
 (generic describe (fn (x) 'thing))
 (extend describe (n <int>) 'int)
 (describe 1)                         ; => int
 ```
+
+## Naming
+
+Names are plain English (`extend`, `copy`, `make-table`, `queue`,
+`stream-filter`), with a few exceptions:
+
+- Short forms everyone knows: `fn`, `def`, `let`, `do`, `mac`, `str`,
+  `vec`, `int`.
+- Arc idioms: `aif` / `it`, `\\` (fill-in-the-blank function), `w/`,
+  `~` (not), `&` (and), `=?`, `0?`, `1?`.
+- `!` marks mutation: `=!` assigns, `data!` defines a mutable record,
+  `clear!`, `enqueue!`.
+
+Where Scheme already has a standard name (`string-length`,
+`call/cc`, `char?`), argyle uses it rather than an alias.
 
 ## Running
 
