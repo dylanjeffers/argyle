@@ -8,16 +8,19 @@
   (lambda (x)
     (define (ids? exps)
       (and-map identifier? exps))
+    (define (lits? exps)
+      (and-map (lambda (e) (or (identifier? e) (keyword? (syntax->datum e))))
+               exps))
     (syntax-case x ()
       ((_ name ctx (f1 ...) exp ...)
        (and (ids? `(,#'name ,#'ctx))
-            (ids? #'(f1 ...)))
+            (lits? #'(f1 ...)))
        #'(%mac name ctx (f1 ...) exp ...))
       ((_ name ctx exp ...)
        (ids? `(,#'name ,#'ctx))
        #'(mac name ctx () exp ...))
       ((_ name (f1 ...) exp ...)
-       (ids? #'(f1 ...))
+       (lits? #'(f1 ...))
        #'(mac name ctx (f1 ...) exp ...))
       ((_ name exp ...)
        (identifier? #'name)
@@ -31,10 +34,15 @@
            (lambda (ctx)
              #,@(receive (defs cases) (parse-mac #'(exp ...))
                   (if (null? cases) defs
-                      #`(#,@defs (syntax-case ctx (f1 ...)
+                      #`(#,@defs (syntax-case ctx #,(literals #'(f1 ...))
                                    #,@(format cases)))))))))))
 
 (eval-when (compile load eval)
+  ;; Guile 3 only accepts identifiers as syntax-case literals; keyword
+  ;; literals like :init still match as plain datums, so drop them here.
+  (define (literals lits)
+    (filter identifier? lits))
+
   (define (format cases)
     (map (lambda (tmp case)
            (syntax-case case ()
@@ -60,7 +68,7 @@
 
 (mac syn-case
   ((ctx (aux ...) ((patt ... . rst) templ) ...)
-   #'(syntax-case ctx (aux ...)
+   #`(syntax-case ctx #,(literals #'(aux ...))
        ((patt ... . rst) templ) ...)))
 
 (mac let-syn

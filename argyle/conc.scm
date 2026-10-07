@@ -69,5 +69,5 @@
                    #,(lp (cdr ms))))))))
 
 
-(eval-when (expand load eval)
+(eval-when (expand load eval compile)
   (def cpy-ref (ref) (ref-mutx! ref (make-mutex))))

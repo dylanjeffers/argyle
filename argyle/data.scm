@@ -49,7 +49,7 @@
 (def data-type (obj)
   (struct-ref (struct-vtable obj) vtable-offset-user))
 
-(eval-when (expand load eval)
+(eval-when (expand load eval compile)
 
  (def std-mke (name) (syn (syn->dat name) name))
  

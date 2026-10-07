@@ -87,7 +87,7 @@
    #'(if-match exp (pat (op-match-xpnd rst . bdy)))))
 
 ;;; TODO: determine if these can be namespaced with base/def
-(eval-when (expand load eval)
+(eval-when (expand load eval compile)
   (_def fn-match (exp)
     (syn-case exp ()
       (((pat ... . rst) b1 b2 ...)
