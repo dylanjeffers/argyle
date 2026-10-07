@@ -1,7 +1,7 @@
-(ns (argyle base type lst))
-(use (argyle base fn)
-     (srfi srfi-1))
-(export filter reduce)
+(ns (argyle base type lst)
+    :use-module (srfi srfi-1)
+    :re-export-and-replace (filter reduce))
+(use (argyle base fn))
 
 (defp lst list)
 (defp lst? list?)
