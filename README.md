@@ -16,8 +16,8 @@ Arc + Guile
 (data point (x y))
 (point-x (point 1 2))                ; => 1
 
-(gen describe (fn (x) 'thing))
-(xtnd describe (n <int>) 'int)
+(generic describe (fn (x) 'thing))
+(extend describe (n <int>) 'int)
 (describe 1)                         ; => int
 ```
 

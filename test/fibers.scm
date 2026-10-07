@@ -20,6 +20,6 @@
        (let out '()
          (go (do (sleep 0.05) (=! out (cons 'second out)))
              (=! out (cons 'first out)))
-         (rev out)))
+         (reverse out)))
 
 (done)

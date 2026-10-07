@@ -214,7 +214,7 @@ MONAD---i.e., return a monadic function in MONAD."
                                        (return (cons item result)))))
                               '()
                               lst)))
-    (return (rev result))))
+    (return (reverse result))))
 
 
 ;; XXX: Making it a macro is a bit brutal as it leads to a lot of code
@@ -230,7 +230,7 @@ evaluating each item of LST in seq."
                   (result '()))
          (match lstx
            (()
-            (return (rev result)))
+            (return (reverse result)))
            ((head . tail)
             (>>= head
                  (fn (item)

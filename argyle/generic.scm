@@ -1,8 +1,8 @@
-;;; Generic functions: gen defines one, xtnd adds a method for a list of
+;;; Generic functions: generic defines one, extend adds a method for a list of
 ;;; argument types.  The generics themselves live in (argyle generic base)
 ;;; and (argyle generic coll).
 (ns (argyle generic)
-  :export (gen <gen-fn> gen-fn? xtnd type))
+  :export (generic <generic> generic? extend type))
 (use (argyle base)
      (argyle data)
      (argyle data table)
@@ -10,11 +10,11 @@
      (argyle loop)
      ((srfi srfi-1) :select (unzip2)))
 
-(mac gen
+(mac generic
   ((name f) (id? #'name)
-   #'(def name (%gen-fn 'name (table 'def f))))
+   #'(def name (%make-generic 'name (table 'def f))))
   ((name) (id? #'name)
-   #'(def name (%gen-fn 'name (let f (imported-ref (current-module) 'name)
+   #'(def name (%make-generic 'name (let f (imported-ref (current-module) 'name)
                                 (if f (table 'def f) (make-table)))))))
 
 ;;; Compiled modules declare their own top-level vars before running, so
@@ -23,10 +23,10 @@
   (let v (or-map (fn (m) (module-variable m name)) (module-uses mod))
     (and v (variable-bound? v) (variable-ref v))))
 
-(data! gen-fn (name table)
-  :init (%gen-fn name table)
+(data! generic (name table)
+  :init (%make-generic name table)
   :app (fn args
-         (apply (resolve-fn (gen-fn-table self) args)
+         (apply (resolve-fn (generic-table self) args)
                 args)))
 
 ;;; Methods live in a tree of tbls keyed by each argument's type in turn.
@@ -55,14 +55,14 @@
   (if (data? x) (data-type x)
       (base-type x)))
 
-;;; Going to straight cpy for this version
-(mac xtnd x
+;;; Going to straight copy for this version
+(mac extend x
   (def split (lst)
     (call-with-values (fn () (unzip2 (grp lst 2))) list))
   ((procedure-name (arg1 ... . rest) body ...) (~(nil? #'rest))
    (let-syn (args types) (split #'(arg1 ...))
      #`(loop ((for type  (in-list 'types))
-              (where type-tree (gen-fn-table procedure-name)
+              (where type-tree (generic-table procedure-name)
                 (or (type-tree type)
                     (do (type-tree type (make-table))
                         (type-tree type)))))
@@ -71,7 +71,7 @@
    (let-syn (args types) (split #'(arg1 ...))
             ;; TODO: refactor
      #`(loop ((for type (in-list 'types))
-              (where type-tree (gen-fn-table procedure-name)
+              (where type-tree (generic-table procedure-name)
                      (or (type-tree type)
                          (do (type-tree type (make-table))
                              (type-tree type)))))

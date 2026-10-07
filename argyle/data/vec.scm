@@ -15,8 +15,8 @@
           ((k) (vector-ref v k))
           ((k obj) (vector-set! v k obj)))))
 
-(defp make-vec (len #:o fill)
-  (%make-vec (make-vector len fill)))
+(defp make-vec (n #:o fill)
+  (%make-vec (make-vector n fill)))
 (defp vec args (list->vec args))
 (defp vec-length (v) (vector-length (v)))
 (defp vec->list (v) (vector->list (v)))

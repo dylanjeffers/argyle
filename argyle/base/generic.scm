@@ -1,5 +1,5 @@
 (ns (argyle base generic)
-  :replace (+ * length))
+  :replace (+ *))
 (use (argyle guile)
      (argyle base fn)
      (argyle base type)) 
@@ -26,13 +26,6 @@
                 (map (fn (val) (symbol (car args)))
                      (iota (apply _* (cdr args))))))
         (else (apply _* args))))
-
-(def length (x)
-  (cond ((list? x) (_length x))
-        ((string? x) (string-length x))
-        ((hash-table? x) (hash-count (const #t) x))
-        ((vector? x) (vector-length x))
-        (else (_length x))))
 
 (def one-of (tests val)
   (if (null? tests) #f

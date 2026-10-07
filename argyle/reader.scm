@@ -34,7 +34,7 @@
           (cond ((end? ends nxt) (values obj rst))
                 ((strt? strts nxt)
                  (let (obj* buff) (parse (mke-struct nxt) prt rst)
-                   (parse (cons (rev obj*) obj) prt buff)))
+                   (parse (cons (reverse obj*) obj) prt buff)))
                 (else (parse (cons (->dat nxt) obj) prt rst))))))
   (read-hash-extend chr
     (fn (chr prt)
@@ -43,7 +43,7 @@
         ;; #[1 #[2 3]] reads "3]]"; hand the rest back to the outer reader.
         (unless (nil? buff)
           (unread-string (apply string-append buff) prt))
-        (rev obj)))))
+        (reverse obj)))))
 
 (def quoted-sym? (obj)
   (and (pair? obj) (memq (car obj) '(quote quasiquote unquote))
@@ -63,7 +63,7 @@
   (let matchs (list-matches regx str)
     (w/ (strts (map match:start matchs)
          ends (map match:end matchs)
-         idxs `(0 ,@(splice (zip strts ends)) ,(len str)))
+         idxs `(0 ,@(splice (zip strts ends)) ,(length str)))
       ;; TODO: use until
       (loop lp ((idxs (delete-duplicates idxs)))
         (if (< (_length idxs) 2) '()
@@ -71,7 +71,7 @@
               ,@(lp (cdr idxs))))))))
 
 (def splice (lst)
-  (reduce join '() (rev lst)))
+  (reduce join '() (reverse lst)))
 
 (def ->dat (str)
   (aif (string->number str) it (string->symbol str)))
