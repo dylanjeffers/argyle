@@ -30,6 +30,41 @@
        (list (type 1) (type "s") (type #[]) (type #{}) (type (q)) (type len)))
 (check "gen-fn?" '(#t #f) (list (gen-fn? len) (gen-fn? car)))
 
+;;; Collection generics keep the collection's type where it makes sense
+
+(def sorted (s) (sort (elements s) <))
+(check "map q set strm" '((2 4) (2 4) (2 4))
+       (list (q->lst (map (\\ * 2 _) (q 1 2)))
+             (sorted (map (\\ * 2 _) (set 1 2)))
+             (strm->lst (map (\\ * 2 _) (strm-range 1 3)))))
+(check "filter lst vec str" '((2 4) #(2 4) "ab")
+       (list (filter even? '(1 2 3 4)) ((filter even? #[1 2 3 4]))
+             (filter char-alphabetic? "a1b2")))
+(check "filter tbl keeps entries" '((b . 2))
+       (let t (filter (fn (k v) (> v 1)) #{'a 1 'b 2})
+         (tbl-map->lst cons t)))
+(check "filter q set strm" '((2) (2) (0 2 4))
+       (list (q->lst (filter even? (q 1 2 3)))
+             (sorted (filter even? (set 1 2 3)))
+             (strm->lst (strm-take 3 (filter even? (strm-frm 0))))))
+(check "reduce" '(10 10 #\c 6 6 6 0)
+       (list (reduce + 0 '(1 2 3 4)) (reduce + 0 #[1 2 3 4])
+             (reduce (fn (c acc) (if (char>? c acc) c acc)) #\a "abc")
+             (reduce + 0 (q 1 2 3)) (reduce + 0 (set 1 2 3))
+             (reduce + 0 (strm-range 1 4)) (reduce + 0 #[])))
+(check "cpy str tbl set are copies" '("ab" 1 (1))
+       (list (let s (string-copy "ab") (let c (cpy s) (string-set! s 0 #\z) c))
+             (let t #{'a 1} (let c (cpy t) (t 'a 9) (c 'a)))
+             (let s (set 1) (let c (cpy s) (s 2) (sorted c)))))
+(check "clr! set" '() (let s (set 1 2) (clr! s) (elements s)))
+(check "len set" 2 (len (set 1 2)))
+
+;;; Anything applicable dispatches as <fn>
+
+(check "generic fn as the mapped fn" '(1 2) (vec->lst (map len #["a" "bb"])))
+(check "vec as the mapped fn" '(b c) (map #['a 'b 'c] '(1 2)))
+(check "tbl as a filter pred" '(a) (filter #{'a #t} '(a b)))
+
 ;;; User-defined generics
 
 (gen describe (fn (x) 'thing))
@@ -47,6 +82,17 @@
 (gen total)
 (xtnd total (x <int> . rest) (apply + x rest))
 (check "dispatch with rest args" '(1 6) (list (total 1) (total 1 2 3)))
+
+(gen tag-with)
+(xtnd tag-with (t <any> n <int>) (list 'int t n))
+(xtnd tag-with (t <any> s <str>) (list 'str t s))
+(check "<any> matches every type" '((int a 1) (str 2 "s") (int "x" 3))
+       (list (tag-with 'a 1) (tag-with 2 "s") (tag-with "x" 3)))
+
+(gen pick)
+(xtnd pick (x <int>) 'exact)
+(xtnd pick (x <any>) 'any)
+(check "exact type beats <any>" '(exact any) (list (pick 1) (pick "s")))
 
 (data point (x y))
 (xtnd describe (p <point>) (list 'point (point-x p)))
