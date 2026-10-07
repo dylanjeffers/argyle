@@ -1,0 +1,9 @@
+#!/bin/sh
+# Run Guile with argyle on the load path and its module syntax booted.
+# With no args, starts a REPL with (argyle) loaded.
+root="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [ $# -eq 0 ]; then
+  exec guile -L "$root" -l "$root/boot.scm" -e '(lambda _ (use-modules (argyle)) (set-current-module (resolve-module (quote (guile-user)))) ((@ (system repl repl) start-repl)))'
+fi
+exec guile -L "$root" -l "$root/boot.scm" "$@"
