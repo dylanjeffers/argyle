@@ -10,7 +10,7 @@
         ((one-of `(,string? ,char?) (car args))
          (apply string-append (map str args)))
         ((symbol? (car args))
-         (apply symbol-append (map sym args)))
+         (apply symbol-append (map symbol args)))
         (else (apply _+ args))))
 
 ;;; TODO: Add cartesian product for data
@@ -23,7 +23,7 @@
                      (iota (apply _* (cdr args))))))
         ((symbol? (car args))
          (apply symbol-append
-                (map (fn (val) (sym (car args)))
+                (map (fn (val) (symbol (car args)))
                      (iota (apply _* (cdr args))))))
         (else (apply _* args))))
 

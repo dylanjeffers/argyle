@@ -12,20 +12,20 @@
 ;;; TODO: add simple heirarchy
 (def base-type (x)
  (cond
-  ((list? x)        '<lst>)
-  ((pair? x)        '<tup>)
+  ((list? x)        '<list>)
+  ((pair? x)        '<pair>)
   ((string? x)        '<str>)
   ;; Not two clauses: Guile 3.0.11's compiler wrongly skips a number?
   ;; clause that follows a failed integer? test, so 1.5 fell through.
-  ((number? x)     (if (integer? x) '<int> '<num>))
+  ((number? x)     (if (integer? x) '<int> '<number>))
   ((procedure? x)         '<fn>)
-  ((symbol? x)        '<sym>)
+  ((symbol? x)        '<symbol>)
   ((syn? x)        '<syn>)
-  ((strm? x)       '<strm>)
-  ((hash-table? x) '<hash-tbl>)
-  ((char? x)        '<chr>)
+  ((strm? x)       '<stream>)
+  ((hash-table? x) '<hash-table>)
+  ((char? x)        '<char>)
   ((vector? x)     '<vector>)
-  ((keyword? x)        '<kwd>)
+  ((keyword? x)        '<keyword>)
   ((null? x)       '<nil>)
   (else            (error "Type: unknown type" x))))
 
@@ -49,35 +49,35 @@
           (fn (x) (hash-set! conversions (car x) (cadr x)))
           (cdr e))))
      `((<dat> (<syn> ,syn->dat)
-              (<lst> ,syn->dat))
+              (<list> ,syn->dat))
        ;; So clearly this is a bit hacky
-       (<syn> (<lst> ,(fn (dat ctx) (dat->syn ctx dat)))
-              (<num> ,(fn (dat ctx) (dat->syn ctx dat)))
+       (<syn> (<list> ,(fn (dat ctx) (dat->syn ctx dat)))
+              (<number> ,(fn (dat ctx) (dat->syn ctx dat)))
               (<str> ,(fn (dat ctx) (dat->syn ctx dat)))
-              (<sym> ,(fn (dat ctx) (dat->syn ctx dat)))
-              (<kwd> ,(fn (dat ctx) (dat->syn ctx dat))))
+              (<symbol> ,(fn (dat ctx) (dat->syn ctx dat)))
+              (<keyword> ,(fn (dat ctx) (dat->syn ctx dat))))
        (<str> (<int> ,number->string)
-              (<num> ,number->string)
-              (<chr> ,string)
-              (<sym> ,(fn (x) (if (eqv? x (symbol)) "" (symbol->string x)))))
+              (<number> ,number->string)
+              (<char> ,string)
+              (<symbol> ,symbol->string))
        
-       (<sym> (<str> ,string->symbol)
-              (<chr> ,(fn (c) (string->symbol (string c))))
-              (<num> ,(\\ (compose string->symbol number->string) _)))
+       (<symbol> (<str> ,string->symbol)
+              (<char> ,(fn (c) (string->symbol (string c))))
+              (<number> ,(\\ (compose string->symbol number->string) _)))
        
-       (<int> (<chr> ,(fn (c . args) (char->integer c)))
-              (<num> ,(fn (x . args) (iround x)))
+       (<int> (<char> ,(fn (c . args) (char->integer c)))
+              (<number> ,(fn (x . args) (iround x)))
               (<str> ,(fn (x . args)
                         (aif (string->number x) (iround it)
-                             (error "Can't coerce" x '-> 'int)))))
+                             (error "Can't coerce" x '-> '<int>)))))
        
-       (<num> (<str> ,(fn (x . args)
+       (<number> (<str> ,(fn (x . args)
                         (or (string->number x)
-                            (error "Can't coerce " x '-> 'num))))
+                            (error "Can't coerce" x '-> '<number>))))
               (<int> ,(fn (x) x)))
        
-       (<chr> (<int> ,integer->char)
-              (<num> ,(fn (x) (integer->char
+       (<char> (<int> ,integer->char)
+              (<number> ,(fn (x) (integer->char
                                (iround x)))))))
     coercions))
 
@@ -91,7 +91,14 @@
                               (symbol-append '< '#,t '>) args)))
                  #'(t1 ...)))))
 
-(export-type-ctrs str num int sym syn dat chr)
+(export-type-ctrs str number int syn dat char)
+
+;;; Guile's symbol joins strings into a symbol; keep that, and coerce
+;;; anything else.
+(defp symbol args
+  (if (or (null? args) (string? (car args)))
+      (string->symbol (apply string-append args))
+      (apply coerce (car args) '<symbol> (cdr args))))
 
 (re-export-ns
  (argyle base type lst)

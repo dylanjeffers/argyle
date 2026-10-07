@@ -19,7 +19,7 @@
 (xtnd map (f <fn> t <tbl>) (tbl-map->lst f t))
 (xtnd map (f <fn> q <q>) (lst->q (lst-map f (q->lst q))))
 (xtnd map (f <fn> s <set>) (apply set (lst-map f (elements s))))
-(xtnd map (f <fn> s <strm>) (strm-map f s))
+(xtnd map (f <fn> s <stream>) (strm-map f s))
 
 (gen filter lst-filter)
 (xtnd filter (f <fn> v <vec>) (lst->vec (lst-filter f (vec->lst v))))
@@ -29,7 +29,7 @@
     (tbl-each (fn (k v) (when (f k v) (t* k v))) t)))
 (xtnd filter (f <fn> q <q>) (lst->q (lst-filter f (q->lst q))))
 (xtnd filter (f <fn> s <set>) (apply set (lst-filter f (elements s))))
-(xtnd filter (f <fn> s <strm>) (strm-fltr f s))
+(xtnd filter (f <fn> s <stream>) (strm-fltr f s))
 
 ;;; (reduce f ridentity coll), as SRFI-1's reduce.
 (gen reduce lst-reduce)
@@ -37,7 +37,7 @@
 (xtnd reduce (f <fn> init <any> s <str>) (lst-reduce f init (string->list s)))
 (xtnd reduce (f <fn> init <any> q <q>) (lst-reduce f init (q->lst q)))
 (xtnd reduce (f <fn> init <any> s <set>) (lst-reduce f init (elements s)))
-(xtnd reduce (f <fn> init <any> s <strm>) (lst-reduce f init (strm->lst s)))
+(xtnd reduce (f <fn> init <any> s <stream>) (lst-reduce f init (strm->lst s)))
 
 (gen cpy list-copy)
 (xtnd cpy (s <str>) (string-copy s))

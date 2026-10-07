@@ -74,7 +74,7 @@
   (reduce join '() (rev lst)))
 
 (def ->dat (str)
-  (aif (string->number str) it (sym str)))
+  (aif (string->number str) it (string->symbol str)))
 
 ;;; backwards cons :)
 (def snoc (lst)

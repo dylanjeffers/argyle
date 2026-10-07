@@ -84,13 +84,18 @@
 
 ;;; Types and conversions
 
-(check "base-type" '(<int> <num> <str> <sym> <lst> <chr> <fn>)
+(check "base-type" '(<int> <number> <str> <symbol> <list> <char> <fn>)
        (map base-type (list 1 1.5 "s" 'a '(1) #\c car)))
-(check "coerce str->num" 42 (coerce "42" '<num>))
+(check "coerce str->num" 42 (coerce "42" '<number>))
 (check "coerce num->int rounds" 5 (coerce 4.6 '<int>))
 (check "coerce int->str" "42" (coerce 42 '<str>))
 (check "coerce same type" "s" (coerce "s" '<str>))
 (check-err "coerce unknown target" (coerce "x" '<nope>))
+(check "coercers" '(3 #\a 42 "a1")
+       (list (number "3") (char 97) (int "42") (str 'a 1)))
+(check "symbol coerces and joins strings like Guile's" '(ab ab x12 #t)
+       (list (symbol "a" "b") (symbol "ab") (symbol 'x12)
+             (eq? (symbol) (string->symbol ""))))
 (check "predicates" '(#t #t #t #t #t #t #t #t #t)
        (list (string? "") (symbol? 'a) (number? 1.5) (integer? 2) (char? #\a)
              (procedure? car) (keyword? :a) (list? '(1)) (pair? '(1 . 2))))
