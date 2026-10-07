@@ -1,11 +1,11 @@
 (ns (argyle base type syn)
     :export (syn? syn->dat dat->syn))
 (use (argyle base fn)
-     (argyle guile))
+     (argyle guile)
+     ((system syntax) :select (syntax?)))
 
-(def syn? (obj)
-  (and (vector? obj)
-       (eq? 'syntax-object (vector-ref obj 0))))
+;;; Guile 3 syntax objects are their own type, no longer tagged vectors.
+(def syn? syntax?)
 
 (def syn->dat syntax->datum)
 (def dat->syn datum->syntax)
