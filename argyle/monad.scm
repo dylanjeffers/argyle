@@ -21,64 +21,75 @@
 (data monad (bind return)
   :init (mke-monad bind return))      ; TODO: Add 'plus' and 'zero'
 
-(mac monad (bind return)
-  ((name (bind b) (return r))
-   (let-syn data (syn (+ '% (dat #'name)) #'name)
-     #'(do
-           ;; The data type, for use at run time.
-         (def data (mke-monad b r))
-         (mac name (%bind %return)
-              ;; An "inlined record", for use at expansion time. The goal is
-              ;; to allow 'bind' and 'return' to be resolved at expansion time
-               ((%bind)   #'b)
-               ((%return) #'r)
-               ((_)         #'rtd))))))
+;;; Plain syntax-case here: the monad name has to expand both as a bare
+;;; identifier (to the run-time record) and as (name %bind) / (name %return)
+;;; (to the inlined procedures), and mac patterns can't match a bare id.
+(define-syntax monad
+  (lambda (s)
+    (syntax-case s (bind return)
+      ((_ name (bind b) (return r))
+       (w/syn (rtd (syn (+ '% (syn->dat #'name)) #'name))
+         #'(do
+             ;; The data type, for use at run time.
+             (def rtd (mke-monad b r))
+             ;; An "inlined record", for use at expansion time, so 'bind'
+             ;; and 'return' can be resolved and open-coded.
+             (define-syntax name
+               (lambda (s)
+                 (syntax-case s (%bind %return)
+                   ((_ %bind)   #'b)
+                   ((_ %return) #'r)
+                   (_           #'rtd))))))))))
 
 (syn-param >>=
   (fn (s)
-    (syn-violation '>>= ">>= (bind) used outside of 'w/monad'" s)))
+    (syntax-violation '>>= ">>= (bind) used outside of 'w/monad'" s)))
 
 (syn-param return
   (fn (s)
-    (syn-violation 'return "return used outside of 'w/monad'" s)))
+    (syntax-violation 'return "return used outside of 'w/monad'" s)))
 
+(syn-param %curr-monad
+  (fn (s)
+    (syntax-violation '%curr-monad "%curr-monad used outside of 'w/monad'" s)))
+
+;;; Return a macro transformer that handles the expansion of '>>=' expressions
+;;; using BIND as the binary bind operator.
+;;;
+;;; This exists to allow the expansion of n-ary '>>=' expressions, even
+;;; though BIND is simply binary, as in:
+;;;
+;;;   (w/monad state-monad
+;;;     (>>= (return 1)
+;;;          (lift 1+ state-monad)
+;;;          (lift 1+ state-monad)))
 (mac bind-syn
-  "Return a macro transformer that handles the expansion of '>>=' expressions
-using BIND as the binary bind operator.
-
-This macro exists to allow the expansion of n-ary '>>=' expressions, even
-though BIND is simply binary, as in:
-
-  (w/monad state-monad
-    (>>= (return 1)
-         (lift 1+ state-monad)
-         (lift 1+ state-monad))) "
   ((bind)
    #'(fn (stx)
-       (def (expand body)
-           (syntax-case body ()
-             ((mval mproc)
-              #'(bind mval mproc))
-             ((x mval mproc0 mprocs (... ...))
-              (expand #'(>>= (>>= mval mproc0)
-                             mprocs (... ...))))))
+       (syntax-case stx ()
+         ((_ mval mproc)
+          #'(bind mval mproc))
+         ((x mval mproc0 mprocs (... ...))
+          #'(>>= (>>= mval mproc0)
+                 mprocs (... ...)))
+         (id (identifier? #'id) #'bind)))))
 
-       (expand stx))))
-
-(mac w/monad
-  "Evaluate BODY in the context of MONAD, and return its result."
-  ((monad body ...)
-   (if (eq? 'macro (syntax-local-binding #'monad))
-       ;; Expansion time
+;;; Evaluate BODY in the context of MONAD, and return its result.
+(define-syntax w/monad
+  (lambda (s)
+    (syntax-case s ()
+      ((_ monad body ...)
+       ;; Expansion time: monad was defined with 'monad', inline it.
+       (eq? 'macro (c/vals (fn () (syntax-local-binding #'monad))
+                           (fn (type val) type)))
        #'(w/syn-params ((>>= (bind-syn (monad %bind)))
                         (return (identifier-syntax (monad %return))))
-           body ...)
+           body ...))
+      ((_ monad body ...)
        ;; Run time
-       #'(w/syn-params ((>>= (bind-syn
-                              (monad-bind monad)))
-                        (return (identifier-syntax
-                                 (monad-return monad))))
-           body ...))))
+       #'(w/syn-params ((>>= (bind-syn (monad-bind monad)))
+                        (return (identifier-syntax (monad-return monad))))
+           body ...)))))
 
 (mac mlet* (->)
   "Bind the given monadic vals MVAL to the given variables VAR.  When the
@@ -104,7 +115,7 @@ form is (VAR -> VAL), bind VAR to the non-monadic value VAL in the same way as
          (_let ((var temp) ...)
            body ...)))))
 
-(mac mdo 
+(mac mdo (%curr-monad)
   "Bind the given monadic expressions in seq, returning the result of
 the last one."
   ((%curr-monad mexp) #'mexp)
@@ -140,22 +151,24 @@ CONDITION is false, return *unspecified* in the curr monad."
 
 (mac def-lift
   ((liftn (args ...))
-   #'(mac liftn
-       "Lift PROC to MONAD---i.e., return a monadic function in MONAD."
-       ((liftn proc monad)
-        ;; Inline the result of lifting PROC, such that 'return' can in
-        ;; turn be open-coded.
-        #'(fn (args ...)
-            (w/monad monad
-              (return (proc args ...)))))
-       ((liftn id)
-        (id? #'id)
-        ;; Slow path: Return a closure-returning procedure (we don't
-        ;; guarantee (eq? LIFTN LIFTN), but that's fine.)
-        #'(fn (proc monad)
-            (fn (args ...)
-              (w/monad monad
-                (return (proc args ...)))))))))
+   #'(define-syntax liftn
+       ;; Lift PROC to MONAD---i.e., return a monadic function in MONAD.
+       (lambda (s)
+         (syntax-case s ()
+           ((_ proc monad)
+            ;; Inline the result of lifting PROC, such that 'return' can in
+            ;; turn be open-coded.
+            #'(fn (args ...)
+                (w/monad monad
+                  (return (proc args ...)))))
+           (id
+            (id? #'id)
+            ;; Slow path: Return a closure-returning procedure (we don't
+            ;; guarantee (eq? LIFTN LIFTN), but that's fine.)
+            #'(fn (proc monad)
+                (fn (args ...)
+                  (w/monad monad
+                    (return (proc args ...)))))))))))
 
 (def-lift lift0 ())
 (def-lift lift1 (a))
