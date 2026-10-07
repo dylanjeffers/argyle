@@ -6,6 +6,7 @@
 
 (defp strm? stream?)
 (defp strm->lst stream->list)
+(defp lst->strm list->stream)
 (defp scar stream-car)
 (defp scdr stream-cdr)
 (defp strm-join stream-concat)
