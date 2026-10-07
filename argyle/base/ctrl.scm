@@ -1,5 +1,5 @@
 (ns (argyle base ctrl)
-    :replace (do = aif it & $> nil?))
+    :replace (do = aif & $> nil?))
 (use ((srfi srfi-1) :select (append-map lset-difference))
      (argyle guile)
      (argyle base mac)
