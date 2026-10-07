@@ -17,8 +17,14 @@
   ((name f) (id? #'name)
    #'(def name (%gen-fn 'name (tbl 'def f))))
   ((name) (id? #'name)
-   #'(def name (%gen-fn 'name (when (defd? 'name)
-                                (tbl 'def name))))))
+   #'(def name (%gen-fn 'name (let f (imported-ref (current-module) 'name)
+                                (if f (tbl 'def f) (mke-tbl)))))))
+
+;;; Compiled modules declare their own top-level vars before running, so
+;;; (defined? 'car) would see the module's unbound car; look in imports.
+(def imported-ref (mod name)
+  (let v (or-map (fn (m) (module-variable m name)) (module-uses mod))
+    (and v (variable-bound? v) (variable-ref v))))
 
 (trans gen-fn (name tbl)
   :init (%gen-fn name tbl)
