@@ -12,7 +12,7 @@
     "argyle/loop/test-foof-loop.scm"))
 
 (def scm-files (dir)
-  (flatn (fn (e)
+  (flat-map (fn (e)
            (let p (str dir "/" e)
              (cond ((member e '("." "..")) '())
                    ((eq? 'directory (stat:type (stat (str root "/" p)))) (scm-files p))

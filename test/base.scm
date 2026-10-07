@@ -22,10 +22,10 @@
 (check "\\\\ cut" '(2 3 4) (map (\\ + 1 _) '(1 2 3)))
 (check "\\\\ rest slot" '(1 2 3) ((\\ list 1 ___) 2 3))
 (check "->> threads left to right" 4 (->> 1 1+ (\\ * 2 _)))
-(check "comp" 7 ((comp 1+ (\\ * 2 _)) 3))
-(check "app" 6 (app + '(1 2 3)))
+(check "compose" 7 ((compose 1+ (\\ * 2 _)) 3))
+(check "apply" 6 (apply + '(1 2 3)))
 (check "wrap" 7 ((wrap 7) 'ignored))
-(check "defd?" '(#t #f) (list (defd? 'sq) (defd? 'no-such-thing)))
+(check "defined?" '(#t #f) (list (defined? 'sq) (defined? 'no-such-thing)))
 (inline twice (x) (* 2 x))
 (check "inline" 8 (twice 4))
 
@@ -41,12 +41,12 @@
 (check "~" '(#t #f) (list (~ #f) (~ 1)))
 (check "0? 1? =?" '(#t #t #f #t) (list (0? 0) (1? 1) (1? 2) (=? 2 2)))
 (check "nil?" '(#t #f) (list (nil? '()) (nil? '(1))))
-(check "flatn" '(1 1 2 2) (flatn (fn (x) (list x x)) '(1 2)))
+(check "flat-map" '(1 1 2 2) (flat-map (fn (x) (list x x)) '(1 2)))
 (check "&map" '(#t #f) (list (&map odd? '(1 3)) (&map odd? '(1 2))))
 (check "set\\\\" '(1 3) (set\ eqv? '(1 2 3) '(2)))
-(check "vals c/vals" 3 (c/vals (fn () (vals 1 2)) +))
-(check "c/ec escapes" 'out (c/ec (fn (k) (k 'out) 'not-here)))
-(check "c/cc" 3 (+ 1 (c/cc (fn (k) (k 2)))))
+(check "values call-with-values" 3 (call-with-values (fn () (values 1 2)) +))
+(check "call/ec escapes" 'out (call/ec (fn (k) (k 'out) 'not-here)))
+(check "call/cc" 3 (+ 1 (call/cc (fn (k) (k 2)))))
 (check "$> plain" 3 ($> (+ 1 2)))
 (check "$> composable continuation" 12 ($> (+ 1 (abort (fn (k) (k (k 10)))))))
 (check "$> escape" 'escaped ($> (* 2 (abort (fn (k) 'escaped)))))
@@ -63,24 +63,24 @@
 (check "* str repeats" "ababab" (* "ab" 3))
 (check "* sym repeats" 'xx (* 'x 2))
 (check "^" 8 (^ 2 3))
-(check "pos? neg?" '(#t #t #f) (list (pos? 1) (neg? -1) (pos? -1)))
+(check "positive? negative?" '(#t #t #f) (list (positive? 1) (negative? -1) (positive? -1)))
 (check "length is polymorphic" '(3 2 2 1)
        (list (length '(1 2 3)) (length "ab") (length #(1 2))
              (let h (make-hash-table) (hash-set! h 'a 1) (length h))))
 
 ;;; IO
 
-(check-out "pr" "a1" (pr "a" 1))
-(check-out "prn" "ab\n" (prn "a" "b"))
-(check-out "prnn" "a\nb\n" (prnn "a" "b"))
+(check-out "print" "a1" (print "a" 1))
+(check-out "println" "ab\n" (println "a" "b"))
+(check-out "print-lines" "a\nb\n" (print-lines "a" "b"))
 (check-out "format prints" "x=1\n" (format "x=~a\n" 1))
-(check-out "pprn" "(1 2)\n" (pprn '(1 2)))
+(check-out "pretty-print" "(1 2)\n" (pretty-print '(1 2)))
 
 ;;; Errors
 
-(check-err "err raises" (err "boom" 1))
-(check "err is misc-error" 'misc-error
-       (catch #t (fn () (err "boom")) (fn (key . _) key)))
+(check-err "error raises" (error "boom" 1))
+(check "error is misc-error" 'misc-error
+       (catch #t (fn () (error "boom")) (fn (key . _) key)))
 
 ;;; Types and conversions
 

@@ -1,5 +1,5 @@
 (ns (argyle base fn)
-    :replace (fn fns def defp let ret w/ \\ ->> inline comp id? defd? wrap))
+    :replace (fn fns def defp let ret w/ \\ ->> inline id? wrap))
 (use (argyle guile)
      (argyle base mac)
      (ice-9 receive))
@@ -57,8 +57,5 @@
   ((name (arg ...) body ...)
    #'(define-inlinable (name arg ...) body ...)))
 
-(defp app apply)
-(defp comp compose)
 (defp id? identifier?)
-(defp defd? defined?)
 (defp wrap const)

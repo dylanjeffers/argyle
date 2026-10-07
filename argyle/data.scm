@@ -65,5 +65,5 @@
              (set\ eq? (syn->dat fields)
                        (map first (syn->dat specs)))) ctx))
  (def not-app (name)
-   (fn args (err "Wrong type to apply:" name
+   (fn args (error "Wrong type to apply:" name
                  "data-type not applicable"))))

@@ -23,7 +23,7 @@
 (defp @ (lzy-obj)
     (cond ((futr? lzy-obj) (touch lzy-obj))
           ((ref? lzy-obj) (ref-val lzy-obj))
-          (else (err "attempt to deref a non-lazy obj" lzy-obj))))
+          (else (error "attempt to deref a non-lazy obj" lzy-obj))))
 
 (mac doasync
   ((e0 ...) #'(parallel e0 ...)))
@@ -48,10 +48,10 @@
        (set! ref (ref-val! ref val)))))
 
 (mac set-refs!
-  (((refs ...) vals)
+  (((refs ...) values)
    #`(do #,@(map (fn (ref val) #`(set! #,ref (ref-val! #,ref (ref-val #,val))))
                  #'(refs ...)
-                 #`(#,@(map (fn (i) #`(list-ref vals #,i))
+                 #`(#,@(map (fn (i) #`(list-ref values #,i))
                             (iota (_length #'(refs ...)))))))))
 
 (mac w/refs

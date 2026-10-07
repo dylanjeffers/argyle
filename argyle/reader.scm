@@ -31,7 +31,7 @@
                           prt (cdr pieces))))
                 (else (parse (cons nxt obj) prt))))
         (let (nxt rst) (snoc buff) 
-          (cond ((end? ends nxt) (vals obj rst))
+          (cond ((end? ends nxt) (values obj rst))
                 ((strt? strts nxt)
                  (let (obj* buff) (parse (mke-struct nxt) prt rst)
                    (parse (cons (rev obj*) obj) prt buff)))
@@ -78,8 +78,8 @@
 
 ;;; backwards cons :)
 (def snoc (lst)
-  (if (nil? lst) (vals '() '()) 
-      (vals (car lst) (cdr lst))))
+  (if (nil? lst) (values '() '()) 
+      (values (car lst) (cdr lst))))
 
 (xtnd-readr #\[ '(vec tbl) '("[" "{") '("]" "}"))
 (xtnd-readr #\{ '(vec tbl) '("[" "{") '("]" "}"))

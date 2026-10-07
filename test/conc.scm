@@ -6,7 +6,7 @@
 (check "futr?" '(#t #f) (list (futr? (futr 1)) (futr? 1)))
 (check "futures run concurrently" '(1 2 3)
        (map @ (list (futr 1) (futr 2) (futr 3))))
-(check "doasync" '(2 4) (c/vals (fn () (doasync (+ 1 1) (+ 2 2))) list))
+(check "doasync" '(2 4) (call-with-values (fn () (doasync (+ 1 1) (+ 2 2))) list))
 
 (check "ref @" 5 (@ (ref 5)))
 (check "ref?" '(#t #f) (list (ref? (ref 1)) (ref? 1)))

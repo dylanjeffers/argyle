@@ -26,7 +26,7 @@
   (q-len! q (1+ (q-len q))))
 
 (defp deq! (q)
-  (if (q-nil? q) (err "Can't dequeue an empty queue!")
+  (if (q-nil? q) (error "Can't dequeue an empty queue!")
       (%deq! q)))
 
 (def %deq! (q)

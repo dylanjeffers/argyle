@@ -42,7 +42,7 @@
              converter (and conversions (hash-ref conversions x-type)))
           (if converter
               (apply converter (cons x args))
-              (err "Can't coerce" x '-> to-type))))))
+              (error "Can't coerce" x '-> to-type))))))
 
 (def coercions
   (ret coercions (make-hash-table)
@@ -69,17 +69,17 @@
        
        (<sym> (<str> ,str->sym)
               (<chr> ,(fn (c) (str->sym (string c))))
-              (<num> ,(\\ (comp str->sym num->str) _)))
+              (<num> ,(\\ (compose str->sym num->str) _)))
        
        (<int> (<chr> ,(fn (c . args) (chr->int c)))
               (<num> ,(fn (x . args) (iround x)))
               (<str> ,(fn (x . args)
                         (aif (str->num x) (iround it)
-                             (err "Can't coerce" x '-> 'int)))))
+                             (error "Can't coerce" x '-> 'int)))))
        
        (<num> (<str> ,(fn (x . args)
                         (or (str->num x)
-                            (err "Can't coerce " x '-> 'num))))
+                            (error "Can't coerce " x '-> 'num))))
               (<int> ,(fn (x) x)))
        
        (<chr> (<int> ,int->chr)

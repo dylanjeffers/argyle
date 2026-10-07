@@ -44,12 +44,12 @@
         => (cond ((and t (t 'fn)) (t 'fn))
                  ((and t (t 'rst)) (t 'rst))
                  ((tbl 'def) (tbl 'def))
-                 (else (err "No generic fn for args1:" args)))
+                 (else (error "No generic fn for args1:" args)))
     ;; This handles . rest case
     (if t
         (aif (t 'rst) it (lp))
         (aif (tbl 'def) it
-            (err "No generic fn for args:" args)))))
+            (error "No generic fn for args:" args)))))
 
 (def type (x)
   (if (data? x) (data-type x)
@@ -58,7 +58,7 @@
 ;;; Going to straight cpy for this version
 (mac xtnd x
   (def split (lst)
-    (c/vals (fn () (unzip2 (grp lst 2))) list))
+    (call-with-values (fn () (unzip2 (grp lst 2))) list))
   ((fn-name (arg1 ... . rest) body ...) (~(nil? #'rest))
    (let-syn (args types) (split #'(arg1 ...))
      #`(loop ((for type  (in-list 'types))

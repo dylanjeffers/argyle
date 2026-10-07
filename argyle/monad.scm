@@ -80,7 +80,7 @@
     (syntax-case s ()
       ((_ monad body ...)
        ;; Expansion time: monad was defined with 'monad', inline it.
-       (eq? 'macro (c/vals (fn () (syntax-local-binding #'monad))
+       (eq? 'macro (call-with-values (fn () (syntax-local-binding #'monad))
                            (fn (type val) type)))
        #'(w/syn-params ((>>= (bind-syn (monad %bind)))
                         (return (identifier-syntax (monad %return))))
@@ -92,7 +92,7 @@
            body ...)))))
 
 (mac mlet* (->)
-  "Bind the given monadic vals MVAL to the given variables VAR.  When the
+  "Bind the given monadic values MVAL to the given variables VAR.  When the
 form is (VAR -> VAL), bind VAR to the non-monadic value VAL in the same way as
 'let'."
   ((monad () body ...)
@@ -222,7 +222,7 @@ MONAD---i.e., return a monadic function in MONAD."
 ;; avoids struct-ref's to MONAD and a few closure allocations when using
 ;; STATE-MONAD.
 (mac seq
-  "Turn the list of monadic vals LST into a monadic list of vals, by
+  "Turn the list of monadic values LST into a monadic list of values, by
 evaluating each item of LST in seq."
   ((monad lst)
    #'(w/monad monad
@@ -237,7 +237,7 @@ evaluating each item of LST in seq."
                    (seq tail (cons item result))))))))))
 
 (def anym (monad mproc lst)
-  "Apply MPROC to the list of vals LST; return as a monadic value the first ;
+  "Apply MPROC to the list of values LST; return as a monadic value the first ;
 value for which MPROC returns a true monadic value or #f.  For example:
 
   (anym state-monad (lift1 odd? state-monad) '(0 1 2))
@@ -256,7 +256,7 @@ value for which MPROC returns a true monadic value or #f.  For example:
                     (lp tail)))))))))
 
 (mac listm
-  "Return a monadic list in MONAD from the monadic vals MVAL."
+  "Return a monadic list in MONAD from the monadic values MVAL."
   ((monad mval ...)
    (let-syn (val ...) (gen-tmps #'(mval ...))
      #'(mlet monad ((val mval) ...)
@@ -274,12 +274,12 @@ value for which MPROC returns a true monadic value or #f.  For example:
 
 (inline state-return (value)
   (fn (state)
-    (vals value state)))
+    (values value state)))
 
 (inline state-bind (mvalue mproc)
   "Bind MVALUE, a value in the state monad, and pass it to MPROC."
   (fn (state)
-    (c/vals
+    (call-with-values
      (fn ()
        (mvalue state))
      (fn (value state)
@@ -299,13 +299,13 @@ two vals: the resulting value, and the resulting state."
 (inline curr-state ()
   "Return the curr state as a monadic value."
   (fn (state)
-    (vals state state)))
+    (values state state)))
 
 (inline curr-state! (value)
   "Set the curr state to VALUE and return the previous state as a monadic
 value."
   (fn (state)
-    (vals state value)))
+    (values state value)))
 
 (def state-pop ()
   "Pop a value from the curr state and return it as a monadic value.  The
@@ -313,10 +313,10 @@ state is assumed to be a list."
   (fn (state)
     (match state
       ((head . tail)
-       (vals head tail)))))
+       (values head tail)))))
 
 (def state-push (value)
   "Push VALUE to the curr state, which is assumed to be a list, and return
 the previous state as a monadic value."
   (fn (state)
-    (vals state (cons value state))))
+    (values state (cons value state))))

@@ -5,7 +5,7 @@
      (argyle base mac)
      (argyle base fn)
      (ice-9 control))
-(re-export abort (call/cc . c/cc) (call/ec . c/ec))
+(re-export abort call/ec)
 
 (mac do ((e1 ...) #'(begin e1 ...)))
 
@@ -22,23 +22,19 @@
 
 (mac & ((e1 ...) #'(and e1 ...)))
 
-(defp c/prmt call-with-prompt)
-(defp c/vals call-with-values)
-(defp tag default-prompt-tag)
-(defp vals values)
 (defp =? _=)
 (defp 0? zero?)
 (defp 1? (n) (=? 1 n))
 (defp ~ not)
-(defp flatn append-map)
+(defp flat-map append-map)
 (defp &map and-map)
 (defp set\ lset-difference)
 (def nil? null?)
 
 (mac $>
-  ((exp)           #'(c/prmt (tag) (fn () exp) hdlr))
-  ((exp hdlr)      #'(c/prmt (tag) (fn () exp) hdlr))
-  ((t expr hdlr)   #'(c/prmt t (fn () expr) hdlr)))
+  ((exp)           #'(call-with-prompt (default-prompt-tag) (fn () exp) hdlr))
+  ((exp hdlr)      #'(call-with-prompt (default-prompt-tag) (fn () exp) hdlr))
+  ((t expr hdlr)   #'(call-with-prompt t (fn () expr) hdlr)))
 
 (def hdlr (cont f)
-  ($> (tag) (f cont) hdlr))
+  ($> (default-prompt-tag) (f cont) hdlr))

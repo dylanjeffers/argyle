@@ -4,7 +4,7 @@
 (use (argyle) (argyle monad) (test check))
 
 (def state-val (mval :o (state :or '()))
-  (c/vals (fn () (run-w/state mval state)) list))
+  (call-with-values (fn () (run-w/state mval state)) list))
 
 (check "ident return" 5 (w/monad ident-monad (return 5)))
 (check "ident >>=" 6 (w/monad ident-monad
