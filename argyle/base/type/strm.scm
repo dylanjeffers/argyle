@@ -37,11 +37,11 @@
 
 (mac slet
   ((tag ((name val) ...) e1 e2 ...)
-   #'(stream-let ((name val) ...) e1 e2 ...)))
+   #'(stream-let tag ((name val) ...) e1 e2 ...)))
 
 (mac strm-match
   ((strm-exp (pat . exp) ...)
-   #'(stream-match strm-map (pat . exp) ...)))
+   #'(stream-match strm-exp (pat . exp) ...)))
 
 (mac strm-of
-  ((exp rst ...) #'(stream-of exr rst ...)))
+  ((exp rst ...) #'(stream-of exp rst ...)))

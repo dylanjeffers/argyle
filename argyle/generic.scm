@@ -99,6 +99,7 @@
 (xtnd join (s1 <str> . rest) (apply str-join s1 rest))
 
 (xtnd join (strms <strm>) (strm-join strms))
+(xtnd join (s1 <strm> . rest) (apply (@ (argyle lib streams) stream-append) s1 rest))
 
 (xtnd cpy (v <vec>) (vec-cpy v))
 (xtnd cpy (q <q>) (%mke-q (q-len q) (q-hd q) (q-tl q)))
