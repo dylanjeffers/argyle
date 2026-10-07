@@ -2,10 +2,10 @@
 
 (use (argyle) (test check))
 
-(check "futr @" 42 (@ (futr (* 6 7))))
-(check "futr?" '(#t #f) (list (futr? (futr 1)) (futr? 1)))
+(check "future @" 42 (@ (future (* 6 7))))
+(check "future?" '(#t #f) (list (future? (future 1)) (future? 1)))
 (check "futures run concurrently" '(1 2 3)
-       (map @ (list (futr 1) (futr 2) (futr 3))))
+       (map @ (list (future 1) (future 2) (future 3))))
 (check "doasync" '(2 4) (call-with-values (fn () (doasync (+ 1 1) (+ 2 2))) list))
 
 (check "ref @" 5 (@ (ref 5)))
@@ -25,7 +25,7 @@
 
 (def counter (ref 0))
 (def bump () (dosync (counter) (alter counter (1+ (@ counter)))))
-(for-each @ (map (fn (i) (futr (bump))) (iota 50)))
+(for-each @ (map (fn (i) (future (bump))) (iota 50)))
 (check "dosync from many futures" 50 (@ counter))
 
 (done)

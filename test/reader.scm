@@ -22,7 +22,7 @@
 (check "#{} holding #[]" 20 ((#{'v #[10 20]} 'v) 1))
 
 (check "#@ derefs a ref" 9 (let r (ref 9) #@r))
-(check "#@ derefs a future" 4 (let f (futr (* 2 2)) #@f))
+(check "#@ derefs a future" 4 (let f (future (* 2 2)) #@f))
 (check "#~ reads as (~ x)" '(~ x) '#~x)
 (check "#~ negates" #t #~#f)
 

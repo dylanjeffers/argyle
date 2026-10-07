@@ -1,6 +1,6 @@
 (ns (argyle conc)
   #:replace (@)
-  :export (futr futr? mke-futr <ref> ref ref? doasync dosync alter))
+  :export (<ref> ref ref? doasync dosync alter))
 (use (argyle base)
      (argyle guile)
      (argyle loop)
@@ -8,22 +8,18 @@
      ((srfi srfi-1) :select (zip))
      (ice-9 futures)
      (ice-9 threads))
-
-(mac futr
-  ((exp) #'(future exp)))
-
-(defp futr? future?)
-(defp mke-futr make-future)
+(re-export future future? make-future touch)
 
 (data ref (val mutx)
   :init (%ref val mutx))
 
 (defp ref (val) (%ref val (make-mutex)))
 
-(defp @ (lzy-obj)
-    (cond ((futr? lzy-obj) (touch lzy-obj))
-          ((ref? lzy-obj) (ref-val lzy-obj))
-          (else (error "attempt to deref a non-lazy obj" lzy-obj))))
+;;; Deref a future (waiting for it) or a ref.
+(defp @ (obj)
+    (cond ((future? obj) (touch obj))
+          ((ref? obj) (ref-val obj))
+          (else (error "attempt to deref a non-lazy obj" obj))))
 
 (mac doasync
   ((e0 ...) #'(parallel e0 ...)))
