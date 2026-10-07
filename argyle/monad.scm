@@ -5,11 +5,11 @@
             ;; Syntax.
             >>= return w/monad mlet mlet* mdo mwhen munless
             lift0 lift1 lift2 lift3 lift4 lift5 lift6 lift7 lift
-            listm foldm mapm seq anym
+            listm foldm mapm sequence anym
 
             ;; Concrete monads.
-            ident-monad state-monad
-            state-return state-bind curr-state curr-state!
+            identity-monad state-monad
+            state-return state-bind current-state set-current-state
             state-push state-pop run-w/state))
 (use ((system syntax)
       :select (syntax-local-binding))
@@ -49,9 +49,9 @@
   (fn (s)
     (syntax-violation 'return "return used outside of 'w/monad'" s)))
 
-(syn-param %curr-monad
+(syn-param %current-monad
   (fn (s)
-    (syntax-violation '%curr-monad "%curr-monad used outside of 'w/monad'" s)))
+    (syntax-violation '%current-monad "%curr-monad used outside of 'w/monad'" s)))
 
 ;;; Return a macro transformer that handles the expansion of '>>=' expressions
 ;;; using BIND as the binary bind operator.
@@ -115,14 +115,14 @@ form is (VAR -> VAL), bind VAR to the non-monadic value VAL in the same way as
          (_let ((var temp) ...)
            body ...)))))
 
-(mac mdo (%curr-monad)
+(mac mdo (%current-monad)
   "Bind the given monadic expressions in seq, returning the result of
 the last one."
-  ((%curr-monad mexp) #'mexp)
-  ((%curr-monad mexp rest ...)
+  ((%current-monad mexp) #'mexp)
+  ((%current-monad mexp rest ...)
    #'(>>= mexp
           (fn (unused-value)
-            (mdo %curr-monad rest ...))))
+            (mdo %current-monad rest ...))))
   ((monad mexp)
    #'(w/monad monad mexp))
   ((monad mexp rest ...)
@@ -136,7 +136,7 @@ the last one."
 CONDITION is false, return *unspecified* in the curr monad."
   ((condition exp0 exp* ...)
    #'(if condition
-         (mdo %curr-monad
+         (mdo %current-monad
            exp0 exp* ...)
          (return *unspecified*))))
 
@@ -146,7 +146,7 @@ CONDITION is false, return *unspecified* in the curr monad."
   ((condition exp0 exp* ...)
    #'(if condition
          (return *unspecified*)
-         (mdo %curr-monad
+         (mdo %current-monad
            exp0 exp* ...))))
 
 (mac def-lift
@@ -221,12 +221,12 @@ MONAD---i.e., return a monadic function in MONAD."
 ;; duplication.  However, it allows >>= and return to be open-coded, which
 ;; avoids struct-ref's to MONAD and a few closure allocations when using
 ;; STATE-MONAD.
-(mac seq
+(mac sequence
   "Turn the list of monadic values LST into a monadic list of values, by
 evaluating each item of LST in seq."
   ((monad lst)
    #'(w/monad monad
-       (loop seq ((lstx   lst)
+       (loop sequence ((lstx   lst)
                   (result '()))
          (match lstx
            (()
@@ -234,7 +234,7 @@ evaluating each item of LST in seq."
            ((head . tail)
             (>>= head
                  (fn (item)
-                   (seq tail (cons item result))))))))))
+                   (sequence tail (cons item result))))))))))
 
 (def anym (monad mproc lst)
   "Apply MPROC to the list of values LST; return as a monadic value the first ;
@@ -268,7 +268,7 @@ value for which MPROC returns a true monadic value or #f.  For example:
 (inline identity-bind (mvalue mproc)
   (mproc mvalue))
 
-(monad ident-monad
+(monad identity-monad
        (bind identity-bind)
        (return identity-return))
 
@@ -296,12 +296,12 @@ value for which MPROC returns a true monadic value or #f.  For example:
 two vals: the resulting value, and the resulting state."
   (mval state))
 
-(inline curr-state ()
+(inline current-state ()
   "Return the curr state as a monadic value."
   (fn (state)
     (values state state)))
 
-(inline curr-state! (value)
+(inline set-current-state (value)
   "Set the curr state to VALUE and return the previous state as a monadic
 value."
   (fn (state)

@@ -6,8 +6,8 @@
 (def state-val (mval :o (state :or '()))
   (call-with-values (fn () (run-w/state mval state)) list))
 
-(check "ident return" 5 (w/monad ident-monad (return 5)))
-(check "ident >>=" 6 (w/monad ident-monad
+(check "ident return" 5 (w/monad identity-monad (return 5)))
+(check "ident >>=" 6 (w/monad identity-monad
                        (>>= (return 5) (fn (x) (return (1+ x))))))
 (check "n-ary >>=" '(3 ())
        (state-val (w/monad state-monad
@@ -30,14 +30,14 @@
        (state-val (mapm state-monad (lift1 1+ state-monad) '(0 1 2))))
 (check "anym" '(#t ())
        (state-val (anym state-monad (lift1 odd? state-monad) '(0 1 2))))
-(check "seq" '((1 2) ())
-       (state-val (seq state-monad (list (return 1) (return 2)))))
+(check "sequence" '((1 2) ())
+       (state-val (sequence state-monad (list (return 1) (return 2)))))
 (check "listm" '((1 2) ())
        (state-val (listm state-monad (return 1) (return 2))))
 (check "state push/pop" '(b (a))
        (state-val (mdo state-monad (state-push 'a) (state-push 'b) (state-pop))))
-(check "curr-state" '((s) (s))
-       (state-val (curr-state) '(s)))
+(check "current-state" '((s) (s))
+       (state-val (current-state) '(s)))
 (check "mwhen" '(x (x))
        (state-val (w/monad state-monad
                     (mwhen #t (state-push 'x) (return 'x)))))
