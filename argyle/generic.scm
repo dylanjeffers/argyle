@@ -1,6 +1,6 @@
 (ns (argyle generic)
   :export (gen <gen-fn> gen-fn? xtnd type
-           str len rev join cpy clr!
+           str len rev join cpy clr! kth
            map))
 (use (argyle base)
      ((argyle base type)
@@ -87,7 +87,12 @@
 (defp str args
   (reduce-right str-join "" (map _str args)))
 
-(xtnd len (n <int>) (length (str n)))
+(xtnd len (s <str>) (str-len s))
+(xtnd len (n <int>) (str-len (str n)))
+(xtnd len (t <tbl>) (tbl-cnt (const #t) t))
+(xtnd len (v <vec>) (vec-len v))
+(xtnd len (q <q>) (q-len q))
+(xtnd len (stream <strm>) (strm-len stream))
 
 (xtnd rev (s <str>) (string-reverse s))
 
