@@ -23,6 +23,12 @@
         (let nxt (get-datum prt)
           (cond ((eof-object? nxt) obj)
                 ((sym? nxt) (parse obj prt (sym-buff nxt)))
+                ;; 'x] reads as (quote x]): split the symbol and keep
+                ;; only its first piece quoted.
+                ((quoted-sym? nxt)
+                 (let pieces (sym-buff (cadr nxt))
+                   (parse (cons `(,(car nxt) ,(->dat (car pieces))) obj)
+                          prt (cdr pieces))))
                 (else (parse (cons nxt obj) prt))))
         (let (nxt rst) (snoc buff) 
           (cond ((end? ends nxt) (vals obj rst))
@@ -33,8 +39,15 @@
   (read-hash-extend chr
     (fn (chr prt)
       (let (obj buff) (parse (mke-struct (str chr)) prt)
-        (if (nil? buff) (rev obj)
-            (error "reader broke, alpha software :("))))))
+        ;; A nested literal can end mid-token, e.g. the inner #[ in
+        ;; #[1 #[2 3]] reads "3]]"; hand the rest back to the outer reader.
+        (unless (nil? buff)
+          (unread-string (apply string-append buff) prt))
+        (rev obj)))))
+
+(def quoted-sym? (obj)
+  (and (pair? obj) (memq (car obj) '(quote quasiquote unquote))
+       (pair? (cdr obj)) (sym? (cadr obj))))
 
 (def strt? (strts obj) (and (str? obj) (or-map (fn (strt) (string=? obj strt)) strts)))
 (def end? (ends obj) (and (str? obj) (or-map (fn (end) (string=? obj end)) ends)))
