@@ -4,9 +4,18 @@
 (use (srfi srfi-1)
      (system base ck))
 
+;; A vtable-vtable whose instances are applicable vtables, so records
+;; built from it can be called like procedures (their first field holds
+;; the procedure).  Guile has no public constructor for this, so set the
+;; applicable-vtable flag (1 << 2) on the vtable's flags slot directly.
+(define (make-app-vtable fields printer)
+  (let ((vt (make-vtable fields printer)))
+    (struct-set!/unboxed vt 1 (logior (struct-ref/unboxed vt 1) 4))
+    vt))
+
 ;; 0: type-name, 1: fields, 2: constructor
 (define record-type-vtable
-  (let ((s (make-app-vtable (string-append standard-vtable-fields "prprpw")
+  (let ((s (make-app-vtable (string-append standard-vtable-fields "pwpwpw")
                             (lambda (s p)
                               (display "#<data-type " p)
                               (display (record-type-name s) p)
