@@ -1,4 +1,5 @@
-(ns (argyle data set))
+(ns (argyle data set)
+    :export (<set> set set? has? elements))
 (use (argyle base)
      (argyle data))
 
@@ -11,7 +12,7 @@
     (for-each (\\ set _) args)))
 
 (defp has? (set v)
-  (hash-ref (set-t set) v))
+  (if (hash-get-handle (set-t set) v) #t #f))
 
 (defp elements (set)
   (hash-map->list (fn (k v) v) (set-t set)))
