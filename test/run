@@ -1,0 +1,20 @@
+#!/bin/sh
+# Run every test suite in this directory; exits non-zero if any fails.
+# Pass suite names (e.g. `test/run base data`) to run only those.
+cd "$(dirname "$0")/.." || exit 1
+if [ $# -gt 0 ]; then
+  suites=$(for s in "$@"; do echo "test/$s.scm"; done)
+else
+  suites=$(ls test/*.scm | grep -v 'test/check.scm')
+fi
+status=0
+for t in $suites; do
+  out=$(bin/argyle "$t" 2>&1)
+  code=$?
+  printf '%-22s %s\n' "$t" "$(printf '%s\n' "$out" | grep -E '^[0-9]+ passed' | tail -1)"
+  if [ $code -ne 0 ]; then
+    printf '%s\n' "$out" | grep -v '^;;; ' | sed 's/^/    /'
+    status=1
+  fi
+done
+exit $status
