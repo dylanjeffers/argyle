@@ -1,7 +1,7 @@
 ;;; Data structures: vec, tbl, q, set, and user-defined data / trans types.
 ;;; Run with: test/run data
 
-(use (argyle) (argyle data set) (test check))
+(use (argyle) (test check))
 
 ;;; vec: applicable, (v k) reads, (v k x) writes, (v) is the raw vector
 
