@@ -17,7 +17,7 @@
 
 (mac aif x
   ((test then else)
-   (let-syn it (datum->syntax x 'it)
+   (let-syn it (datum->syntax #'then 'it)
      #'(let it test (if it then else)))))
 
 (mac & ((e1 ...) #'(and e1 ...)))
